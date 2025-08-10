@@ -1,0 +1,184 @@
+
+version: 0.2
+facility: "University Hospital ED"
+last_updated: "2025-08-09"
+notes:
+  - "CT availability unchanged at night: two ED CT scanners, 24/7."
+  - "Approval hierarchy follows triage color (red vs yellow/green)."
+  - "This is a runnable demo policy; adjust codes/names to local LIS/RIS/EHR."
+
+triage_levels:
+  red:
+    description: "Instable / resuscitation bay"
+    attending_required: true
+  yellow_green:
+    description: "Stable (seen by triage nurse + resident)"
+    attending_required: false
+
+night_mode:
+  enabled: true
+  differences:
+    specialist_eta_minutes_default: 30
+    ct_scanners:
+      count: 2
+      note: "No reduction at night; both scanners staffed 24/7."
+    icu_staffed_beds_adjustment: 0  # no assumption change here; override if needed
+
+approvals:
+  # Actions: AUTO | TRIAGE_RN | ATTENDING_CONFIRM
+  red:
+    ems_prealert: AUTO
+    ecg: AUTO
+    labs_standard_ed_panel: AUTO
+    fast: AUTO
+    ct_resus: AUTO
+    ct_non_resus: ATTENDING_CONFIRM
+    specialist_page: AUTO
+    bed_request: ATTENDING_CONFIRM
+    diversion: ATTENDING_CONFIRM
+    icu_request: ATTENDING_CONFIRM
+    mtp_start: AUTO
+    blood_non_mtp: ATTENDING_CONFIRM
+  yellow_green:
+    ems_prealert: AUTO
+    ecg: AUTO
+    labs_standard_ed_panel: AUTO
+    fast: TRIAGE_RN
+    ct_resus: ATTENDING_CONFIRM
+    ct_non_resus: ATTENDING_CONFIRM
+    specialist_page: TRIAGE_RN
+    bed_request: ATTENDING_CONFIRM
+    diversion: ATTENDING_CONFIRM
+    icu_request: ATTENDING_CONFIRM
+    mtp_start: ATTENDING_CONFIRM
+    blood_non_mtp: ATTENDING_CONFIRM
+
+escalation:
+  # Re-page timers and ladder
+  approval_missing_minutes: 15
+  second_page_after_minutes: 10
+  ladder:
+    - role: "Charge nurse"
+    - role: "ED resident"
+    - role: "ED attending (backup)"
+  log_acknowledgments: true
+
+orders:
+  panels:
+    standard_ed_panel:
+      # Fill in local LIS test codes; names here are human-readable placeholders
+      tests:
+        - "CBC"
+        - "CRP"
+        - "ESR"
+        - "CMP (Na, K, Cl, CO2, BUN, Creatinine, Glucose, Ca)"
+        - "Liver enzymes (AST, ALT, ALP, GGT, Bilirubin)"
+        - "Coagulation (PT/INR, aPTT)"
+        - "D-dimer"
+        - "Cardiac enzymes (hs-Troponin I/T, CK, CK-MB)"
+        - "Magnesium, Phosphate"
+        - "TSH if syncope/chest pain profile"
+        - "β-hCG (female of childbearing potential)"
+        - "ABO/Rh + type & screen (per nursing protocol)"
+    chest_pain_profile:
+      inherit: standard_ed_panel
+      add:
+        - "Serial hs-Troponin at 0/1/3h"
+        - "ECG initial + repeat at 30 min if ongoing pain"
+        - "CXR portable"
+    trauma_profile:
+      inherit: standard_ed_panel
+      add:
+        - "VBG/ABG with lactate"
+        - "Type & crossmatch (if hemorrhage suspected)"
+        - "TEG/ROTEM if available"
+    pregnant_syncope_profile:
+      inherit: standard_ed_panel
+      add:
+        - "Quantitative β-hCG"
+        - "Urinalysis"
+        - "Group & screen"
+        - "Consider thyroid panel if indicated"
+
+imaging_protocols:
+  ct_resus:
+    description: "Resus-bay CT with immediate access"
+    scanners_available: 2
+    priority_queue: true
+  ct_head_stroke:
+    description: "Non-contrast head CT; CT angiography per stroke protocol"
+    scanners_available: 2
+    priority_queue: true
+  fast:
+    description: "ED-performed FAST within 10 minutes"
+  ob_ultrasound:
+    description: "OB transabdominal/transvaginal per gestational age"
+
+notification_triggers:
+  trauma:
+    always_page:
+      - "Trauma surgery"
+      - "Anesthesia"
+      - "Radiology CT tech"
+      - "OR standby (if criteria met)"
+    pediatric_additional:
+      - "Pediatric surgery"
+      - "PICU"
+  chest_pain:
+    stemi_suspected:
+      - "Cardiology (direct)"
+      - "Cath lab"
+      - "Radiology (portable CXR)"
+    high_risk_non_stemi:
+      - "Cardiology"
+      - "Observation unit coordinator"
+    low_risk:
+      - "Internal medicine (if disposition unclear)"
+  pregnant_syncope:
+    unstable_mother:
+      - "ED attending"
+      - "OBGYN"
+      - "Internal medicine"
+    stable_early_gestation:
+      - "Internal medicine"
+    fetal_distress_or_late_trimester:
+      - "OBGYN first"
+
+sla_targets:
+  ecg_from_door_minutes: 10
+  fast_minutes: 10
+  ct_booking_after_trauma_activation_minutes: 2
+  lab_tat_watch_factor: 1.5  # re-page at 1.5x median TAT
+  stroke_ct_eta_minutes: 15
+
+capacity_rules:
+  ct:
+    scanners: 2
+    twentyfour_seven: true
+  icu_overflow:
+    steps:
+      - "Check step-down/intermediate care availability"
+      - "Query in-house ICU for downgrade candidates"
+      - "If none, query regional ICU availability and prep transfer"
+  ward_full:
+    steps:
+      - "Place ED hold with timer"
+      - "Notify service head for prioritization"
+      - "Check alternate service per policy"
+      - "Prepare interfacility transfer if hold exceeds threshold"
+
+safety_hard_stops:
+  - "Ionizing imaging in known pregnancy without explicit attending approval (unless life-threatening)"
+  - "Iodinated contrast in severe contrast allergy without premed protocol"
+  - "Blood products (non-MTP) require attending confirmation"
+  - "Consent-requiring procedures are never auto-executed"
+
+audit:
+  record:
+    - "inputs"
+    - "policy_rules_fired"
+    - "model_scores"
+    - "thresholds"
+    - "approver_identity"
+    - "timestamps"
+    - "override_reason"

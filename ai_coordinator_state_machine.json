@@ -1,0 +1,207 @@
+{
+  "version": "0.2",
+  "pathways": {
+    "major_trauma": {
+      "states": [
+        "ems_prealert",
+        "resus_arrival",
+        "primary_survey",
+        "fast_ct_parallel",
+        "results_review",
+        "disposition"
+      ],
+      "initial": "ems_prealert",
+      "events": {
+        "ems_signal": {
+          "from": [
+            "ems_prealert"
+          ],
+          "to": "resus_arrival",
+          "actions": [
+            "page_trauma_bundle",
+            "open_case_board",
+            "book_ct_resus",
+            "prepare_fast"
+          ]
+        },
+        "arrival": {
+          "from": [
+            "resus_arrival"
+          ],
+          "to": "primary_survey",
+          "actions": [
+            "auto_labs_trauma_profile",
+            "start_sla_timers"
+          ]
+        },
+        "survey_complete": {
+          "from": [
+            "primary_survey"
+          ],
+          "to": "fast_ct_parallel",
+          "actions": [
+            "perform_fast",
+            "send_to_ct_if_indicated"
+          ]
+        },
+        "imaging_complete": {
+          "from": [
+            "fast_ct_parallel"
+          ],
+          "to": "results_review",
+          "actions": [
+            "notify_attending",
+            "collect_results"
+          ]
+        },
+        "decide_disposition": {
+          "from": [
+            "results_review"
+          ],
+          "to": "disposition",
+          "actions": [
+            "request_bed_or_icu_or_or",
+            "prepare_transfer_if_needed"
+          ]
+        }
+      }
+    },
+    "chest_pain": {
+      "states": [
+        "triage",
+        "ecg_and_labs",
+        "risk_stratify",
+        "imaging_optional",
+        "observation_or_admit",
+        "disposition"
+      ],
+      "initial": "triage",
+      "events": {
+        "triage_start": {
+          "from": [
+            "triage"
+          ],
+          "to": "ecg_and_labs",
+          "actions": [
+            "order_ecg",
+            "order_chest_pain_panel"
+          ]
+        },
+        "results_update": {
+          "from": [
+            "ecg_and_labs"
+          ],
+          "to": "risk_stratify",
+          "actions": [
+            "run_model_risk",
+            "page_cardiology_if_stemi"
+          ]
+        },
+        "risk_low": {
+          "from": [
+            "risk_stratify"
+          ],
+          "to": "observation_or_admit",
+          "actions": [
+            "propose_obs_unit_or_internal"
+          ]
+        },
+        "risk_high": {
+          "from": [
+            "risk_stratify"
+          ],
+          "to": "imaging_optional",
+          "actions": [
+            "book_cxr",
+            "consider_cta_if_indicated"
+          ]
+        },
+        "finalize": {
+          "from": [
+            "observation_or_admit",
+            "imaging_optional"
+          ],
+          "to": "disposition",
+          "actions": [
+            "request_bed_or_obs",
+            "prepare_discharge_if_appropriate"
+          ]
+        }
+      }
+    },
+    "pregnant_syncope": {
+      "states": [
+        "triage",
+        "initial_workup",
+        "fetal_assessment",
+        "routing_decision",
+        "disposition"
+      ],
+      "initial": "triage",
+      "events": {
+        "triage_start": {
+          "from": [
+            "triage"
+          ],
+          "to": "initial_workup",
+          "actions": [
+            "order_ecg",
+            "order_preg_syncope_panel"
+          ]
+        },
+        "initial_results": {
+          "from": [
+            "initial_workup"
+          ],
+          "to": "fetal_assessment",
+          "actions": [
+            "quant_hcg",
+            "schedule_ob_ultrasound_if_indicated"
+          ]
+        },
+        "routing": {
+          "from": [
+            "fetal_assessment"
+          ],
+          "to": "routing_decision",
+          "actions": [
+            "run_model_target_service",
+            "apply_gestational_policy"
+          ]
+        },
+        "finalize": {
+          "from": [
+            "routing_decision"
+          ],
+          "to": "disposition",
+          "actions": [
+            "page_internal_or_obgyn",
+            "request_bed_or_ed_hold"
+          ]
+        }
+      }
+    }
+  },
+  "shared_triggers": {
+    "sla_watchers": [
+      "watch_ecg_10min",
+      "watch_fast_10min",
+      "watch_ct_booking_2min_post_activation",
+      "watch_lab_tat_1_5x_median"
+    ],
+    "escalations": [
+      "repage_after_15min_no_ack",
+      "escalate_after_additional_10min"
+    ]
+  },
+  "tools_required": [
+    "order_entry(place_order_code)",
+    "schedule_ct(priority, scanner)",
+    "page(role, payload)",
+    "bed_request(service, level)",
+    "icu_query_and_request(level)",
+    "regional_transfer_query(send_packet)",
+    "results_subscribe(test_or_study_id)",
+    "audit_log(write_event)"
+  ]
+}
