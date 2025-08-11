@@ -1,0 +1,14 @@
+version: "1.0"
+archetypes:
+  ACS_rule_in:
+    demographics: {age: [55, 88], sex: ["M","F"], diabetes_p: 0.35, ckd_stage_probs: [0.55,0.2,0.15,0.07,0.03]}
+    vitals: {HR: [70,120], MAP: [65,90], SpO2: [92,99]}
+    troponin: {assay: Abbott_Architect_hs_cTnI, t0: [10,60], delta_1h: [6.5,24]}
+    ecg:
+      phenotype: ["NON_DIAGNOSTIC","ANTERIOR_OCCLUSION"]
+      severity_probs: {CRITICAL: 0.25, URGENT: 0.6, NORMAL: 0.15}
+      qtc_ms: [420,520]
+      st_v2_mm: [0.0,3.0]
+      st_v3_mm: [0.0,5.0]
+      confidence: [0.82,0.98]
+    flags: {suspected_pe: false, pregnant: false, postpartum_6w: false, sepsis_suspected: false, tachyarrhythmia_present: false, hypoxia_or_anemia: false}
