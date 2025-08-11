@@ -1,0 +1,17 @@
+filename,payload
+US-1_CHECKOUT.png,EDEQ|op=CHECKOUT|equip=US-1|zone=ED Core
+US-1_CHECKIN.png,EDEQ|op=CHECKIN|equip=US-1|zone=ED Core
+US-1_PING.png,EDEQ|op=PING|equip=US-1|zone=ED Core
+US-2_CHECKOUT.png,EDEQ|op=CHECKOUT|equip=US-2|zone=ED Core
+US-2_CHECKIN.png,EDEQ|op=CHECKIN|equip=US-2|zone=ED Core
+US-2_PING.png,EDEQ|op=PING|equip=US-2|zone=ED Core
+US-3_CHECKOUT.png,EDEQ|op=CHECKOUT|equip=US-3|zone=ED Core
+US-3_CHECKIN.png,EDEQ|op=CHECKIN|equip=US-3|zone=ED Core
+US-3_PING.png,EDEQ|op=PING|equip=US-3|zone=ED Core
+ZONE_Resus.png,EDEQ|op=PING|equip=US-ANY|zone=Resus
+ZONE_CT.png,EDEQ|op=PING|equip=US-ANY|zone=CT
+ZONE_ED_Core.png,EDEQ|op=PING|equip=US-ANY|zone=ED Core
+ZONE_Triage.png,EDEQ|op=PING|equip=US-ANY|zone=Triage
+ZONE_Obs.png,EDEQ|op=PING|equip=US-ANY|zone=Obs
+ZONE_Radiology.png,EDEQ|op=PING|equip=US-ANY|zone=Radiology
+ZONE_Biomed.png,EDEQ|op=PING|equip=US-ANY|zone=Biomed

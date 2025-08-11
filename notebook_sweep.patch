@@ -1,0 +1,273 @@
+### modeling-icu-constraints-in-ed-pipeline.ipynb
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell0 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell0 (after)
+@@ -82,4 +82,4 @@
+ 
+ # Sanity print (optional)
+ print("ICU operational beds:", ICU_OPERATIONAL_BEDS)
+-print("Non-ICU sizes:", DEPARTMENTS_SIZE)
++print("Non-ICU sizes:", DEPARTMENTS_SIZE)
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell1 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell1 (after)
+@@ -63,4 +63,4 @@
+ # Quick test
+ df = generate_dataset(5)
+ print(df.head())
+-print("\nShape:", df.shape)
++print("\nShape:", df.shape)
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell2 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell2 (after)
+@@ -62,4 +62,4 @@
+         "icu_bottleneck_risk": float(np.clip(bottleneck, 0, 1)),
+         "pathway_latency_min": pathway_latency_min,
+         "route_plan": route_plan
+-    }
++    }
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell3 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell3 (after)
+@@ -119,5 +119,3 @@
+     record.update(synth_icu_labels(record))
+     return record
+ 
+-
+-
+
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell4 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell4 (after)
+@@ -10,4 +10,4 @@
+ display(df.head(2)[[
+     "suspected_condition","ems_triage_code","icu_assignment_suitability",
+     "icu_bottleneck_risk","pathway_latency_min","route_plan"
+-]])
++]])
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell5 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell5 (after)
+@@ -39,4 +39,4 @@
+ 
+ train_loader = DataLoader(TensorDataset(Xtr_t, ytr_t), batch_size=64, shuffle=True)
+ val_loader   = DataLoader(TensorDataset(Xva_t, yva_t), batch_size=256)
+-test_loader  = DataLoader(TensorDataset(Xte_t, yte_t), batch_size=256)
++test_loader  = DataLoader(TensorDataset(Xte_t, yte_t), batch_size=256)
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell6 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell6 (after)
+@@ -17,4 +17,4 @@
+         return out_assign, out_bottle
+ 
+ input_dim = Xtr_np.shape[1]
+-model = MLP_MultiTask(input_dim)
++model = MLP_MultiTask(input_dim)
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell7 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell7 (after)
+@@ -42,4 +42,4 @@
+             print("Early stopping")
+             break
+ 
+-model.load_state_dict(best_state)
++model.load_state_dict(best_state)
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell8 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell8 (after)
+@@ -16,4 +16,4 @@
+ mae_bottle = mean_absolute_error(yte_np[:, 1], bottle_preds)
+ 
+ print(f"Assignment suitability → MSE {mse_assign:.4f} | MAE {mae_assign:.4f}")
+-print(f"Bottleneck risk       → MSE {mse_bottle:.4f} | MAE {mae_bottle:.4f}")
++print(f"Bottleneck risk       → MSE {mse_bottle:.4f} | MAE {mae_bottle:.4f}")
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell9 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell9 (after)
+@@ -14,4 +14,4 @@
+ mse_bottle = mean_squared_error(yte_np[:,1], bottle_preds)
+ mae_bottle = mean_absolute_error(yte_np[:,1], bottle_preds)
+ print(f"Assign MSE {mse_assign:.4f} | MAE {mae_assign:.4f}")
+-print(f"Bottle MSE {mse_bottle:.4f} | MAE {mae_bottle:.4f}")
++print(f"Bottle MSE {mse_bottle:.4f} | MAE {mae_bottle:.4f}")
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell10 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell10 (after)
+@@ -25,4 +25,4 @@
+     Xperm[:, j] = col
+ 
+ imp = pd.DataFrame({"feature": feature_names, "mse_increase": drops}).sort_values("mse_increase", ascending=False)
+-display(imp.head(15))
++display(imp.head(15))
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell11 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell11 (after)
+@@ -52,4 +52,4 @@
+ ])
+ 
+ print("\nGroup-level permutation importance:")
+-display(group_df.sort_values(by="perm_mse_increase", ascending=False))
++display(group_df.sort_values(by="perm_mse_increase", ascending=False))
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell12 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell12 (after)
+@@ -35,4 +35,4 @@
+ plt.xlabel("MSE increase when permuted")
+ plt.title("Permutation Importance (Test set) — Top 15 features")
+ plt.tight_layout()
+-plt.show()
++plt.show()
+--- modeling-icu-constraints-in-ed-pipeline.ipynb:cell13 (before)
++++ modeling-icu-constraints-in-ed-pipeline.ipynb:cell13 (after)
+@@ -76,4 +76,4 @@
+ plt.xlabel("MSE increase when permuted")
+ plt.title("Permutation Importance (ICU assignment head) — Top 15")
+ plt.tight_layout()
+-plt.show()
++plt.show()
+
+### real-hamburg-df-wired-correctly.ipynb
+--- real-hamburg-df-wired-correctly.ipynb:cell0 (before)
++++ real-hamburg-df-wired-correctly.ipynb:cell0 (after)
+@@ -268,4 +268,4 @@
+ # Instantiate and inspect
+ hamburg_df = make_real_hamburg_df(num_patients=100, seq_len=16)
+ print("hamburg_df shape:", hamburg_df.shape)
+-print(hamburg_df.head())
++print(hamburg_df.head())
+--- real-hamburg-df-wired-correctly.ipynb:cell1 (before)
++++ real-hamburg-df-wired-correctly.ipynb:cell1 (after)
+@@ -39,4 +39,4 @@
+ 
+ print("✅ Forward pass shapes:")
+ for k, v in out.items():
+-    print(f"  {k:15s} → {tuple(v.shape)}")
++    print(f"  {k:15s} → {tuple(v.shape)}")
+--- real-hamburg-df-wired-correctly.ipynb:cell2 (before)
++++ real-hamburg-df-wired-correctly.ipynb:cell2 (after)
+@@ -59,7 +59,7 @@
+         # scale delay to [0,1]
+         td = tgt['response_delay'].clamp(0,60)/60
+         pd = F.softplus(out['response_delay'])/60
+-        Ld = self.mse(pd.clamp(0,1), td)
++        Ld = self.mse(0.clip(1), td)
+         losses = torch.stack([Lc,Lb,Lr,Ld])
+         precision = torch.exp(-self.log_vars)
+         wloss = precision*losses + self.log_vars
+@@ -102,4 +102,4 @@
+ train_metrics = run_epoch(train_loader, train=True)
+ val_metrics   = run_epoch(val_loader,   train=False)
+ print(f"Train ▶ loss {train_metrics['loss']:.3f} | acc {train_metrics['acc']:.3f}")
+-print(f" Val  ▶ loss {val_metrics  ['loss']:.3f} | acc {val_metrics  ['acc']:.3f}")
++print(f" Val  ▶ loss {val_metrics  ['loss']:.3f} | acc {val_metrics  ['acc']:.3f}")
+--- real-hamburg-df-wired-correctly.ipynb:cell3 (before)
++++ real-hamburg-df-wired-correctly.ipynb:cell3 (after)
+@@ -40,4 +40,4 @@
+             print(f"Early stopping at epoch {epoch} (no improvement for {patience} epochs)")
+             break
+ 
+-print("Training complete. Best val loss:", best_loss)
++print("Training complete. Best val loss:", best_loss)
+
+### baseline-first-real-data-ready-scaffold(4).ipynb
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell0 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell0 (after)
+@@ -82,4 +82,4 @@
+ 
+ # Sanity print (optional)
+ print("ICU operational beds:", ICU_OPERATIONAL_BEDS)
+-print("Non-ICU sizes:", DEPARTMENTS_SIZE)
++print("Non-ICU sizes:", DEPARTMENTS_SIZE)
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell1 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell1 (after)
+@@ -63,4 +63,4 @@
+ # Quick test
+ df = generate_dataset(5)
+ print(df.head())
+-print("\nShape:", df.shape)
++print("\nShape:", df.shape)
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell2 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell2 (after)
+@@ -62,4 +62,4 @@
+         "icu_bottleneck_risk": float(np.clip(bottleneck, 0, 1)),
+         "pathway_latency_min": pathway_latency_min,
+         "route_plan": route_plan
+-    }
++    }
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell3 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell3 (after)
+@@ -119,5 +119,3 @@
+     record.update(synth_icu_labels(record))
+     return record
+ 
+-
+-
+
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell4 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell4 (after)
+@@ -10,4 +10,4 @@
+ display(df.head(2)[[
+     "suspected_condition","ems_triage_code","icu_assignment_suitability",
+     "icu_bottleneck_risk","pathway_latency_min","route_plan"
+-]])
++]])
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell5 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell5 (after)
+@@ -14,4 +14,4 @@
+ X_train, X_tmp, y_train, y_tmp = train_test_split(X, y, test_size=0.4, random_state=42)
+ X_val,  X_test, y_val,  y_test = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=42)
+ 
+-print("Train/Val/Test:", X_train.shape, X_val.shape, X_test.shape)
++print("Train/Val/Test:", X_train.shape, X_val.shape, X_test.shape)
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell6 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell6 (after)
+@@ -29,4 +29,4 @@
+ 
+ print(f"Validation MSE: {mse:.4f}")
+ print(f"Validation MAE: {mae:.4f}")
+-print(f"Training time: {end_time - start_time:.2f} seconds")
++print(f"Training time: {end_time - start_time:.2f} seconds")
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell7 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell7 (after)
+@@ -100,4 +100,4 @@
+             print("Early stopping.")
+             break
+ 
+-mlp.load_state_dict(best_state)
++mlp.load_state_dict(best_state)
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell8 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell8 (after)
+@@ -16,4 +16,4 @@
+ plt.ylabel("Predicted suitability")
+ plt.title("MLP — Predicted vs Actual Suitability")
+ plt.legend()
+-plt.show()
++plt.show()
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell9 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell9 (after)
+@@ -18,5 +18,4 @@
+     mlp.eval()
+     with torch.no_grad():
+         y_hat = mlp(X_tensor).cpu().numpy().ravel()
+-    return y_hat
+-
++    return y_hat
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell10 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell10 (after)
+@@ -35,4 +35,4 @@
+ plt.xlabel("MSE increase when permuted")
+ plt.title("Permutation Importance (Test set) — Top 15 features")
+ plt.tight_layout()
+-plt.show()
++plt.show()
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell11 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell11 (after)
+@@ -12,4 +12,4 @@
+ )
+ 
+ group_summary = imp_df.groupby("group")["perm_mse_increase"].sum().reset_index().sort_values("perm_mse_increase", ascending=False)
+-display(group_summary)
++display(group_summary)
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell12 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell12 (after)
+@@ -20,4 +20,4 @@
+ # Sort by absolute correlation
+ cor_df = pd.DataFrame.from_dict(correlations, orient='index', columns=['Pearson_corr'])
+ cor_df['abs_corr'] = cor_df['Pearson_corr'].abs()
+-cor_df.sort_values('abs_corr', ascending=False)
++cor_df.sort_values('abs_corr', ascending=False)
+--- baseline-first-real-data-ready-scaffold(4).ipynb:cell13 (before)
++++ baseline-first-real-data-ready-scaffold(4).ipynb:cell13 (after)
+@@ -72,4 +72,4 @@
+ 
+ mse_test_no_icu = mean_squared_error(y_test, y_pred_no_icu)
+ mae_test_no_icu = mean_absolute_error(y_test, y_pred_no_icu)
+-print(f"No ICU features → Test MSE: {mse_test_no_icu:.4f} | MAE: {mae_test_no_icu:.4f}")
++print(f"No ICU features → Test MSE: {mse_test_no_icu:.4f} | MAE: {mae_test_no_icu:.4f}")
