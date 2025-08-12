@@ -1,0 +1,62 @@
+# synthetic_config.yaml — ED end-to-end pathway generator (24h)
+arrival_process:
+  base_per_hour: [6,5,5,5,6,8,10,12,14,16,18,20,20,18,16,14,14,16,18,16,12,10,8,6]
+  ems_frac: 0.35
+  trauma_frac: 0.12
+  chest_pain_frac: 0.50   # bumped so page_cardiology actually appears
+
+triage:
+  system: MTS
+  level_probs: {1:0.08, 2:0.30, 3:0.42, 4:0.18, 5:0.02}
+
+syndromes:
+  chest_pain:
+    mix: {stemi:0.06, nstemi:0.24, noncardiac:0.70}
+    door_to_ecg_min: {mean:7, sd:3}
+    first_labs_tat_min: {mean:40, sd:12}
+    cxr_tat_min: {mean:35, sd:15}
+    consult_cardiology:
+      accept_prob_stemi: 1.0
+      accept_prob_nstemi: 0.6
+      reluctance_extra_wait_min: {mean:30, sd:10}
+  neuro_deficit:
+    ct_head_tat_min: {mean:25, sd:10}
+    consult_neurology:
+      accept_prob: 0.85
+      delay_min_mean: 30
+  polytrauma:
+    fast_tat_min: {mean:8, sd:3}
+    ct_polytrauma_tat_min: {mean:35, sd:12}
+
+resources:
+  ct_scanners: 1
+  xray_rooms: 2
+  lab_analyzers: 2
+  service_times_min:
+    ct:  {shape:2.0, scale:12}
+    xray:{shape:2.0, scale:6}
+    lab: {shape:2.0, scale:18}
+
+capacity:
+  icu_beds_total: 12
+  ward_beds_total: 120
+  icu_free_init: 3
+  ward_free_init: 25
+  update_every_min: 15
+  stale_prob: 0.10
+
+behavior:
+  repage_after_min: 15
+  escalate_after_min: 25
+  cardiology_reluctance_nstemi: 0.35
+  neurology_overload_extra_delay_min: {mean:15, sd:10}
+
+noise:
+  missing_ts_prob: 0.02
+  duplicate_order_prob: 0.01
+  cancel_prob: 0.03
+  code_flip_prob: 0.01
+
+sampling:
+  bin_size_min: 5
+  day_start: "2025-08-12 00:00:00"
