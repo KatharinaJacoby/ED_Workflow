@@ -1,0 +1,70 @@
+version: "2025-08-13"
+project: "ED Coordination Assistant (Urban)"
+goal: "Automate/administer ED coordination workflows without making medical decisions."
+non_goals:
+  - "No AI diagnosis."
+  - "No autonomous therapy planning."
+  - "No real patient data in PoC."
+actors: ["EMS","Triage Nurse","ED Physician","Radiology","Lab","Ward","ICU","Coordinator AI"]
+environment:
+  his: "Orbis (simulated)"
+  interfaces: ["HL7 ORM/ORU (simulated)","JSON bridge"]
+language: "de-DE"
+timezone: "Europe/Berlin"
+units: "minutes"
+data_inputs:
+  ems: ["triage_level","trauma_flag","vitals","allergies","past_admissions","insurance"]
+  triage: ["reassessed_vitals","complaint","risk_flags"]
+  diagnostics: ["orders","status","results"]
+  capacity: ["ed_beds","ward_beds","icu_beds","stale_flag"]
+outputs:
+  proposals: ["order_ecg","perform_fast","order_chest_pain_panel","book_cxr","schedule_ct","request_bed","icu_query_and_request","page(role)"]
+  notifications: ["result_ready","reminder_due","capacity_recheck_needed"]
+  audit_log: true
+guardrails:
+  human_in_loop: true
+  forbidden:
+    - "Diagnosis or treatment recommendations"
+    - "Medication dosing or therapy changes"
+    - "Bypassing confirmation for orders/transfers"
+  escalation:
+    - "Repage after 15min no ack"
+    - "Escalate after additional 10min"
+policies:
+  confidence_gating:
+    enabled: true
+    param_tau: "{use gate_tau.json if available; else 0.5}"
+    action_on_low_conf: "propose NO_OP / ask-human-check"
+  capacity_staleness:
+    require_repoll_if_stale: true
+    staleness_window_min: [45, 90]
+  privacy: "synthetic-only; no PHI"
+allowed_actions:
+  - name: "order_ecg"; requires_confirmation: true
+  - name: "perform_fast"; requires_confirmation: true
+  - name: "order_chest_pain_panel"; requires_confirmation: true
+  - name: "book_cxr"; requires_confirmation: true
+  - name: "schedule_ct"; requires_confirmation: true
+  - name: "request_bed"; requires_confirmation: true
+  - name: "icu_query_and_request"; requires_confirmation: true
+  - name: "page"; params: ["role","payload"]; requires_confirmation: true
+validation:
+  kpis:
+    - "admin_minutes_saved_per_patient"
+    - "interruptions_per_shift"
+    - "time_to_doctor_notification_critical_ekg"
+    - "med_transfer_error_rate"
+  fairness_slices: ["daytype","load_quartile"]
+  metrics:
+    - "macro_f1"
+    - "safety_weighted_utility"
+templates:
+  task_header: |
+    ### Task
+    description: <one-line goal>
+    stage: <ems_prealert | capacity_check | ed_arrival | intra_ed | specialist_handoff>
+    inputs: <bullet list of available fields>
+    outputs_expected: <proposals/notifications>
+    constraints: <any overrides>
+  proposal_record: ["timestamp","stage","action","requires_confirmation","confidence","rationale","audit_id"]
+notes: "Keep action names aligned with FSM and bridge mappings; log overrides and escalations."

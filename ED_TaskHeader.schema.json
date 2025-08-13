@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ED_TaskHeader",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 5
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "ems_prealert",
+        "capacity_check",
+        "ed_arrival",
+        "intra_ed",
+        "specialist_handoff"
+      ]
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs_expected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "description",
+    "stage",
+    "inputs",
+    "outputs_expected"
+  ]
+}

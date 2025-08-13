@@ -1,0 +1,25 @@
+
+actions:
+  - {code: "NO_OP",            label: "No action", critical: false}
+  - {code: "ORDER_ECG",        label: "Order ECG", critical: false}
+  - {code: "PERFORM_FAST",     label: "Perform FAST", critical: true}
+  - {code: "ORDER_LABS",       label: "Order Labs", critical: false}
+  - {code: "ORDER_XR",         label: "Order X-Ray", critical: false}
+  - {code: "ORDER_CT",         label: "Order CT", critical: true}
+  - {code: "REQUEST_CONSULT",  label: "Request consult", critical: false}
+  - {code: "REQUEST_BED",      label: "Request bed", critical: true}
+
+features: ["minute_of_day", "cap_stale", "ems", "consult_delay_min",
+           "syn_chest_pain", "syn_polytrauma", "syn_neuro_deficit", "syn_other"]
+
+backbone: {type: "gru", hidden: 64, dropout: 0.3}
+head: {type: "unified"}
+
+thresholds:
+  "2": 0.25
+  "5": 0.25
+  "7": 0.30
+
+gate: {tau: 0.5, top_k: 3}
+temperature: 1.0
+seed: 1337
