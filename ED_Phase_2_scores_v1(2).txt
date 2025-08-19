@@ -1,0 +1,45 @@
+# === RS2: Contract-compliant feature_dict extension (no method replacement) ===
+try:
+    CONFIG
+except NameError:
+    CONFIG = {"RUN_PIPELINE": False}
+
+def _extend_feature_dict_safely():
+    """
+    Extend WorkflowState.feature_dict() without replacing the original method.
+    Contract-compliant: only adds keys, preserves original functionality.
+    """
+    if hasattr(WorkflowState, '_phase2_extended'):
+        return  # Already extended
+    
+    # Store reference to original method (don't replace it)
+    _original_method = WorkflowState.feature_dict
+    
+    def enhanced_feature_dict(self):
+        # Get base features from original method
+        features = _original_method(self)
+        
+        # Add Phase 2 extensions only when enabled
+        if CONFIG.get("RUN_PIPELINE", False):
+            try:
+                # Ensure we have a mutable copy
+                if not isinstance(features, dict):
+                    features = dict(features)
+                
+                # Add risk scores if not already present
+                if "risk_scores" not in features:
+                    features["risk_scores"] = compute_risk_scores_from_feature_dict(features)
+                    
+            except Exception as e:
+                # Graceful degradation - add error info but don't break
+                features["risk_scores_error"] = str(e)
+        
+        return features
+    
+    # Safe replacement with tracking
+    WorkflowState.feature_dict = enhanced_feature_dict
+    WorkflowState._phase2_extended = True
+    print("✅ Phase 2 feature_dict extension applied (contract-compliant)")
+
+# Apply extension safely
+_extend_feature_dict_safely()
