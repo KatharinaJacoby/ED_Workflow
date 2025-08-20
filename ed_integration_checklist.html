@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED System Integration Checklist: Real Data → Clinical Operations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: white;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 18px;
+            font-style: italic;
+        }
+        h2 {
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
+            padding-left: 15px;
+            margin-top: 30px;
+            font-size: 22px;
+        }
+        h3 {
+            color: #3498db;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+        .critical-gaps {
+            background: #fff5f5;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .workflow-diagram {
+            background: #f8f9fa;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 12px;
+        }
+        .checklist {
+            background: #f0fff4;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .checklist ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .checklist li {
+            margin: 8px 0;
+        }
+        .success-criteria {
+            background: #fff9e6;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .phase-box {
+            background: #ecf0f1;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .priority-list {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .integration-point {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .emoji {
+            font-size: 1.2em;
+        }
+        @media print {
+            body { margin: 0; padding: 15px; }
+            .header { page-break-after: avoid; }
+            h2 { page-break-before: auto; page-break-after: avoid; }
+            .code-block { page-break-inside: avoid; }
+            .workflow-diagram { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span class="emoji">🎯</span> ED System Integration Checklist</h1>
+        <div class="subtitle">Real Data → Clinical Operations</div>
+    </div>
+
+    <div class="critical-gaps">
+        <h2><span class="emoji">🚨</span> CRITICAL GAPS IDENTIFIED</h2>
+        <ol>
+            <li><strong>Real ML Pipeline</strong> ✅ exists but <strong>disconnected</strong> from operational system</li>
+            <li><strong>ICU Constraints Module</strong> - placeholder hooks but <strong>no implementation</strong></li>
+            <li><strong>Clinical Decision Points</strong> - no clear integration between scores and workflows</li>
+            <li><strong>Live Validation</strong> - no connection between real patients and test data methodology</li>
+        </ol>
+    </div>
+
+    <h2><span class="emoji">🔧</span> PHASE 2B: DATA-OPERATIONS INTEGRATION</h2>
+
+    <h3>1. ICU Constraints Implementation</h3>
+    <div class="code-block">
+# /mnt/data/icu_constraints.py - CREATE THIS MODULE
+def compute_icu_flags(state: WorkflowState) -> Dict[str, Any]:
+    """
+    Real ICU capacity constraints affecting ED decisions
+    Based on: current ICU census, staffing, equipment availability
+    """
+    return {
+        "icu_beds_available": get_icu_bed_count(),
+        "icu_staff_ratio": compute_nurse_patient_ratio(), 
+        "ventilator_availability": check_ventilator_status(),
+        "step_down_beds": get_step_down_capacity(),
+        "transfer_delays": estimate_transfer_time(),
+        "overflow_protocol": should_activate_overflow(),
+        "discharge_pressure": compute_discharge_urgency()
+    }
+    </div>
+
+    <div class="priority-list">
+        <strong>Priority Implementation:</strong>
+        <ul>
+            <li><strong>Bed Census Integration</strong> - Real-time ICU bed availability</li>
+            <li><strong>Staffing Constraints</strong> - Nurse-to-patient ratios affecting admissions</li>
+            <li><strong>Equipment Bottlenecks</strong> - Ventilator/monitor availability</li>
+            <li><strong>Transfer Logistics</strong> - Elevator access, transport team availability</li>
+            <li><strong>Overflow Protocols</strong> - When to activate surge capacity</li>
+        </ul>
+    </div>
+
+    <h3>2. Real Data Pipeline Integration</h3>
+    <div class="code-block">
+# Connect your isotonic_calibration model to live workflows
+class ClinicalModelBridge:
+    def __init__(self, model_path: str):
+        self.calibrated_model = joblib.load(model_path)  # Your isotonic model
+        
+    def score_patient(self, state: WorkflowState) -> Dict[str, float]:
+        """Convert WorkflowState → model features → calibrated probabilities"""
+        features = self._extract_features(state)
+        probs = self.calibrated_model.predict_proba([features])[0, 1]
+        return {
+            "deterioration_risk": probs,
+            "confidence": self._compute_confidence(features),
+            "recommendation": self._threshold_decision(probs)
+        }
+    </div>
+
+    <div class="integration-point">
+        <strong>Integration Points:</strong>
+        <ul>
+            <li><strong>Feature Engineering</strong> - Map WorkflowState → model input format</li>
+            <li><strong>Real-time Scoring</strong> - Live patient data → calibrated probabilities</li>
+            <li><strong>Threshold Application</strong> - Your 0.85 recall floor in production</li>
+            <li><strong>Model Updates</strong> - Retrain pipeline with new hospital data</li>
+            <li><strong>A/B Testing Framework</strong> - Compare model vs standard care</li>
+        </ul>
+    </div>
+
+    <h3>3. Clinical Decision Integration</h3>
+    <div class="code-block">
+# WHERE your ML models actually provide clinical value
+def enhanced_action_generation(state: WorkflowState) -> List[Dict[str, Any]]:
+    """Combine rules + ML + ICU constraints"""
+    
+    # Phase 1: Operational actions (existing)
+    actions = generate_candidates(state)
+    
+    # Phase 2: ML-enhanced prioritization 
+    if CONFIG["RUN_PIPELINE"]:
+        ml_scores = clinical_model.score_patient(state)
+        icu_flags = compute_icu_flags(state)
+        
+        # ML-informed action ranking
+        for action in actions:
+            action["ml_priority"] = compute_ml_priority(action, ml_scores)
+            action["icu_feasible"] = check_icu_feasibility(action, icu_flags)
+            action["combined_score"] = weighted_score(action)
+    
+    return sorted(actions, key=lambda x: x.get("combined_score", 0), reverse=True)
+    </div>
+
+    <h2><span class="emoji">📊</span> PHASE 2C: VALIDATION & EVALUATION FRAMEWORK</h2>
+
+    <h3>4. Live Validation Pipeline</h3>
+    <div class="code-block">
+# Connect your train/val/test methodology to live system
+class ClinicalValidation:
+    def __init__(self):
+        self.test_data = pd.read_csv("test_DE_full.csv")  # Your held-out set
+        
+    def validate_live_predictions(self, patient_outcomes: pd.DataFrame):
+        """Compare live system performance vs test set benchmarks"""
+        live_auc = compute_live_auc(patient_outcomes)
+        test_auc = self.benchmark_auc  # From your isotonic pipeline
+        
+        return {
+            "performance_drift": abs(live_auc - test_auc),
+            "calibration_quality": compute_brier_score(patient_outcomes),
+            "clinical_impact": measure_decision_quality(patient_outcomes),
+            "recommendation": "retrain" if performance_drift > 0.05 else "continue"
+        }
+    </div>
+
+    <div class="integration-point">
+        <strong>Validation Components:</strong>
+        <ul>
+            <li><strong>Performance Monitoring</strong> - Live AUC vs test set benchmarks</li>
+            <li><strong>Calibration Tracking</strong> - Are probabilities well-calibrated in practice?</li>
+            <li><strong>Clinical Outcomes</strong> - Does ML actually improve patient care?</li>
+            <li><strong>Model Decay Detection</strong> - When to retrain with new data</li>
+            <li><strong>Safety Monitoring</strong> - Catch dangerous model failures</li>
+        </ul>
+    </div>
+
+    <h3>5. Real Clinical Workflow Integration</h3>
+    <div class="code-block">
+def clinical_decision_loop(patient_id: str):
+    """The actual clinical workflow where everything connects"""
+    
+    # 1. Get current patient state (Phase 1 operational)
+    state = get_patient_state(patient_id)
+    
+    # 2. Apply ICU constraints (Phase 2B)
+    icu_status = compute_icu_flags(state)
+    
+    # 3. ML risk assessment (Phase 2B) 
+    ml_assessment = clinical_model.score_patient(state)
+    
+    # 4. Enhanced action generation (Phase 2B)
+    actions = enhanced_action_generation(state)
+    
+    # 5. Present to clinician with ML insights
+    return {
+        "patient_summary": format_patient_dashboard(state),
+        "risk_assessment": ml_assessment,
+        "icu_constraints": icu_status,
+        "recommended_actions": actions[:3],  # Top 3 ML-ranked actions
+        "confidence_flags": identify_uncertainty(ml_assessment)
+    }
+    </div>
+
+    <h2><span class="emoji">🏗️</span> OVERALL WORKFLOW ARCHITECTURE</h2>
+
+    <div class="workflow-diagram">
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐<br>
+│   PHASE 1       │    │   PHASE 2B      │    │   PHASE 2C      │<br>
+│  OPERATIONAL    │───▶│  ML INTEGRATION │───▶│   VALIDATION    │<br>
+└─────────────────┘    └─────────────────┘    └─────────────────┘<br>
+│                      │                      │                 <br>
+│ • Equipment Track    │ • Real Data Models   │ • Live A/B Tests<br>
+│ • SOP Access         │ • ICU Constraints    │ • Performance Mon<br>
+│ • Lingering Monitor  │ • Clinical Decisions │ • Safety Checks <br>
+│                      │                      │                 <br>
+│ ✅ WORKING NOW       │ 🔧 INTEGRATION       │ 📊 VALIDATION   <br>
+└──────────────────────┼──────────────────────┼─────────────────<br>
+                       │                      │<br>
+        ┌──────────────▼──────────────────────▼─────────────────┐<br>
+        │            CLINICAL WORKFLOW LOOP                     │<br>
+        │                                                       │<br>
+        │  Patient State → ICU Constraints → ML Assessment →    │<br>
+        │  Enhanced Actions → Clinician Interface → Outcomes    │<br>
+        └───────────────────────────────────────────────────────┘
+    </div>
+
+    <h2><span class="emoji">✅</span> CRITICAL NEXT STEPS CHECKLIST</h2>
+
+    <div class="checklist">
+        <h3>Stage 1: ICU Constraints Module</h3>
+        <ul>
+            <li>☐ Create <code>/mnt/data/icu_constraints.py</code></li>
+            <li>☐ Implement bed census tracking</li>
+            <li>☐ Add staffing ratio calculations</li>
+            <li>☐ Connect to main pipeline via existing hooks</li>
+        </ul>
+    </div>
+
+    <div class="checklist">
+        <h3>Stage 2: ML Model Integration</h3>
+        <ul>
+            <li>☐ Load your isotonic calibrated model into the system</li>
+            <li>☐ Create feature extraction from <code>WorkflowState</code></li>
+            <li>☐ Implement real-time scoring pipeline</li>
+            <li>☐ Add threshold-based recommendations</li>
+        </ul>
+    </div>
+
+    <div class="checklist">
+        <h3>Stage 3: Clinical Decision Points</h3>
+        <ul>
+            <li>☐ Enhance action generation with ML scores</li>
+            <li>☐ Add ICU feasibility checking to actions</li>
+            <li>☐ Create combined scoring algorithm</li>
+            <li>☐ Test with simulated patient scenarios</li>
+        </ul>
+    </div>
+
+    <div class="checklist">
+        <h3>Stage 4: Validation Framework</h3>
+        <ul>
+            <li>☐ Implement live performance monitoring</li>
+            <li>☐ Create calibration quality checks</li>
+            <li>☐ Add safety monitoring alerts</li>
+            <li>☐ Connect to your test set benchmarks</li>
+        </ul>
+    </div>
+
+    <div class="checklist">
+        <h3>Stage 5: Integration Testing</h3>
+        <ul>
+            <li>☐ End-to-end workflow testing</li>
+            <li>☐ UI integration of ML insights</li>
+            <li>☐ Performance validation</li>
+            <li>☐ Clinical workflow simulation</li>
+        </ul>
+    </div>
+
+    <div class="success-criteria">
+        <h2><span class="emoji">🎯</span> SUCCESS CRITERIA</h2>
+        <ol>
+            <li><strong>ICU Constraints Active</strong> - Real bottleneck scenarios affect ED decisions</li>
+            <li><strong>ML Models Live</strong> - Your isotonic calibration running on real patients</li>
+            <li><strong>Validation Working</strong> - Performance monitoring vs your test set</li>
+            <li><strong>Clinical Integration</strong> - ML insights visible in clinical workflow</li>
+            <li><strong>Safety Monitoring</strong> - Automated detection of model failures</li>
+        </ol>
+        <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 6px;">
+            <strong>Key Insight:</strong> You have the <strong>real data pipeline</strong> and <strong>operational foundation</strong>. 
+            Now connect them through <strong>ICU constraints</strong> and <strong>clinical decision integration</strong>.
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #bdc3c7; color: #7f8c8d;">
+        <p><strong>ED System Integration Checklist</strong> | Real Data → Clinical Operations</p>
+        <p>Generated for clinical system integration and validation framework implementation</p>
+    </div>
+
+</body>
+</html>
