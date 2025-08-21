@@ -1,0 +1,111 @@
+{\rtf1\ansi\deff0
+{\b ED Pipeline Demo — Handoff (Session 2025-08-21)}\par
+Author: Assistant\par
+Date: 2025-08-21 11:22:34\par
+\par
+{\b Scope}\par
+This handoff captures the current demo baseline of the ED Pipeline notebook, the ML\textendash OPS bridge, Phase\textendash 2 calculators/UI, medication plan import with interaction/allergy checks (paper scanner/paste), HL7 merge behavior, logging, and the steps to train and swap in a new model bundle. No production deployment; conference demo focus.\par
+\par
+{\b Stable Baseline}\par
+\bullet\ Notebook: {\i your saved cleaned baseline (Option A applied)}\par
+\bullet\ Alternate copy created during cleanup: {\i ed-pipeline-demo-full-phase-2-ui-aligned-ready.cleaned-OptionA-20250821-100721.ipynb}\par
+\bullet\ Event log: /kaggle/working/event_log.jsonl (Kaggle) \emdash /mnt/data/event_log.jsonl (local)\par
+\bullet\ Guards (single source of truth): CONFIG[\lquote RUN\_UI\rquote], CONFIG[\lquote RUN\_MEDS\rquote], CONFIG[\lquote RUN\_PIPELINE\rquote], CONFIG[\lquote RUN\_SYNTH\rquote]\par
+\bullet\ Model bundle (demo): ed\_phase2\_model\_thr\_patched(1).joblib; threshold \~0.9988444286248084; features = 16\par
+\par
+{\b Deterministic Run Order}\par
+1) Bootstrap/CONFIG (defines BASE, \_p(), flags, paths)\par
+2) (Optional) Meds/Allergy path sanity (ensures JSON files exist)\par
+3) Bundle loader (copies the .joblib from /kaggle/input/<slug> to /kaggle/working and sets CONFIG[\lquote MODEL\_BUNDLE\_PATH\rquote])\par
+4) Self-contained ML\textrightarrow OPS bridge (exposes {\i FEAT} and {\i predict\_one})\par
+5) Phase\textendash 2 calculators + {\i phase2\_bundle}\par
+6) UI cell ({\i Phase-2 calculators — optimized UI} + HL7 merge + ML one-liner)\par
+\par
+{\b Phase\textendash 2 Calculators (implemented)}\par
+qSOFA, MEWS, HEART, GRACE (coarse), SOFA (minimal), D-dimer (age-adjusted; pregnancy aware), Troponin \u916?\u0327? (delta, absolute and percent), Wells PE/DVT, PERC, PESI + sPESI, SIRS, Sepsis-3 (with shock flag), Marburg, Glasgow-Blatchford (GI bleed), Child-Pugh, corrected calcium (albumin), anion gap (albumin-corrected).\par
+Output format includes concise one-liners and a numeric dict for programmatic use.\par
+\par
+{\b HL7 Merge (in UI)}\par
+\bullet\ Parses OBX lines; extracts bilirubin, INR, albumin (unit-aware), troponin series (timestamped), and D-dimer (unit-aware).\par
+\bullet\ Merges into Labs JSON: always writes troponin\_series; fills D-dimer + unit if available; merges bilirubin/INR/albumin.\par
+\par
+{\b Pregnancy-adapted YEARS}\par
+Panel logic supports pregnancy pathway (context JSON: {\i "pregnant": true}). Emits a log line and applies pregnancy D-dimer thresholding. PERC is not used in pregnancy.\par
+\par
+{\b Meds Integration (single path kept)}\par
+\bullet\ Kept: {\i Medication Plan Import + Checks (inline, no sidecars)} \emdash supports paper scanner/OCR (if present) and paste of med plan text to build a Medications JSON.\par
+\bullet\ Removed: duplicate meds engines/UIs and the BMP barcode/XML (DataMatrix/FHIR) scanner per instruction.\par
+\bullet\ JSON files: CONFIG[\lquote MED\_RULES\_PATH\rquote] and CONFIG[\lquote ALLERGIES\_PATH\rquote] (Kaggle-safe via \_p()). Expected to contain arrays of rules and patient allergies.\par
+\bullet\ Checks: simple name/class interaction match and allergy/cross-reactivity match. Germany-realistic seeds recommended (e.g., phenprocoumon, DOAC class rules) if you want demo interactions.\par
+\par
+{\b ICU Panel}\par
+\bullet\ Replaces \lquote actionable vs blocked\rquote\ with: {\i Next bed available on ICU X in X minutes/hrs} using capacity/occupied and discharge ETA inputs.\par
+\par
+{\b ML \textrightarrow OPS Wiring}\par
+\bullet\ Bundle loader: copies the joblib from attached dataset and sets CONFIG[\lquote MODEL\_BUNDLE\_PATH\rquote].\par
+\bullet\ Bridge: loads bundle; exposes {\i FEAT} (feature list) and {\i predict\_one(row)}. UI builds {\i row} by mapping features from Labs/Vitals/Context with 0.0 fallback; computes calibrated probability and compares to bundle threshold; appends one-liner and logs {\i ml\_score}.\par
+\par
+{\b Known Good Demo Output (example)}\par
+qSOFA=3  MEWS=8  GRACE(coarse)=110\par
+HEART=2  SOFA(min)=7\par
+D-dimer 780 vs thr 680 ug/L \u2192? High\par
+Troponin \u916?\u0327? 60.0 ng/L (333.3\pct) \u2192? FLAG\par
+Wells-PE=4.5 (likely)  Wells-DVT=0 (unlikely)\par
+PERC=fail  sPESI=2  PESI=V/188\par
+SIRS=3  Sepsis3: YES  Shock: no\par
+MARBURG=1/5  GBS=3\par
+Child-Pugh C (10)\par
+Corrected Ca=8.86 mg/dL\par
+Anion gap=13.0, AGcorr=16.0\par
+ML risk p=0.000 \u2192? ok (thr=0.999)\par
+Logged to: /kaggle/working/event\_log.jsonl\par
+\par
+{\b Attachments \& Slugs}\par
+\bullet\ Demo notebook needs only the {\b model bundle} dataset; {\b no} Train/Val/Test CSVs required.\par
+\bullet\ If Kaggle added \lquote (1)\rquote\ to the filename, either reference it literally or use a glob loader to normalize to /kaggle/working/ed\_phase2\_model\_thr\_patched.joblib.\par
+\par
+{\b Troubleshooting Quicklist}\par
+\bullet\ {\b UI doesn\lquote t show}: ensure CONFIG[\lquote RUN\_UI\rquote]=True; run bootstrap first.\par
+\bullet\ {\b ML risk says bridge not loaded}: run bundle loader, then bridge cell; ensure CONFIG[\lquote MODEL\_BUNDLE\_PATH\rquote] points to the copied joblib under /kaggle/working.\par
+\bullet\ {\b File not found for bundle}: verify dataset slug and filename (watch for \lquote (1)\rquote). Consider robust glob.\par
+\bullet\ {\b Duplicate logs/prints}: make sure there is only one UI cell and one bridge; delete duplicate meds engines/UIs.\par
+\bullet\ {\b HL7 values missing}: confirm OBX fields present; the merge fills bilirubin/INR/albumin and, if present, D-dimer (with unit) and troponin\_series.\par
+\par
+{\b Next Step: Train a New Model (summary)}\par
+1) Open the {\i trainer} notebook (your model version).\par
+2) Attach CSV dataset (e.g., /kaggle/input/testtrainval with train\_DE\_full.csv, val\_DE\_full.csv, test\_DE\_full.csv).\par
+3) Run the pipeline: proper train/val/test split; fit base classifier; select threshold with recall\textgreater=0.85 floor; isotonic calibrate.\par
+4) Export joblib with \lquote pipeline\rquote, \lquote features\rquote, \lquote threshold\rquote, and optional \lquote calibrator\rquote.\par
+5) Upload the new bundle into a Kaggle dataset (unique slug) \emdash or attach to the demo session and copy into /kaggle/working.\par
+6) In the demo notebook, update the loader slug (or use glob), re-run bridge, re-run UI.\par
+\par
+{\b Minimal Code Snippets}\par
+{\ul Robust bundle loader}\par
+{\ttfamily
+import os, glob, shutil\par
+DATASET = "your-bundle-slug"\par
+ROOT = f"/kaggle/input/{DATASET}"\par
+cands = []\par
+for pat in ["ed\_phase2\_model*\_patched*.joblib", "*phase2*patched*.joblib", "*.joblib"]:\par
+\pard\li360 cands += sorted(glob.glob(os.path.join(ROOT, pat)))\par
+\pard assert cands, f"No .joblib found in {ROOT}"\par
+SRC = cands[0]\par
+DST = "/kaggle/working/ed\_phase2\_model\_thr\_patched.joblib"\par
+if not os.path.exists(DST): shutil.copy2(SRC, DST)\par
+CONFIG["MODEL\_BUNDLE\_PATH"] = DST\par
+print("Bundle ready \u2192", CONFIG["MODEL\_BUNDLE\_PATH"])\par
+}\par
+{\ul Debug ML features in UI}\par
+{\ttfamily
+miss = [f for f in FEAT if labs.get(f, vitals.get(f, ctx.get(f))) is None]\par
+print(f"[ML debug] thr={res['thr']:.3f} p={res['p']:.3f} n\_feat={len(FEAT)} missing={len(miss)}")\par
+}\par
+\par
+{\b Contract Checks}\par
+\bullet\ No background jobs; single-pass notebook. Guards gate optional panels.\par
+\bullet\ One \_append\_event, one bridge, one meds UI; no barcode BMP scanner.\par
+\bullet\ Paths Kaggle-safe via \_p().\par
+\par
+{\b Done}\par
+This handoff is self-contained for your new session. Attach the bundle dataset, run in order, and you’re demo-ready; switch to training when desired.\par
+}
