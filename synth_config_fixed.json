@@ -1,0 +1,95 @@
+{
+  "arrival_process": {
+    "base_per_hour": [
+      6,
+      5,
+      5,
+      5,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      20,
+      18,
+      16,
+      14,
+      14,
+      16,
+      18,
+      16,
+      12,
+      10,
+      8,
+      6
+    ],
+    "ems_frac": 0.35,
+    "chest_pain_frac": 0.30000000000000004
+  },
+  "triage": {
+    "system": "MTS",
+    "level_probs": {
+      "1": 0.08,
+      "2": 0.3,
+      "3": 0.42,
+      "4": 0.18,
+      "5": 0.02
+    }
+  },
+  "syndromes": {
+    "chest_pain": {
+      "mix": {
+        "stemi": 0.06,
+        "nstemi": 0.24,
+        "noncardiac": 0.7
+      }
+    },
+    "neuro_deficit": {},
+    "polytrauma": {}
+  },
+  "resources": {
+    "ct_scanners": 1,
+    "xray_rooms": 2,
+    "lab_analyzers": 2,
+    "service_times_min": {
+      "ct": {
+        "shape": 2.0,
+        "scale": 12
+      },
+      "xray": {
+        "shape": 2.0,
+        "scale": 6
+      },
+      "lab": {
+        "shape": 2.0,
+        "scale": 18
+      }
+    }
+  },
+  "capacity": {
+    "icu_beds_total": 12,
+    "ward_beds_total": 120,
+    "icu_free_init": 3,
+    "ward_free_init": 25,
+    "update_every_min": 15,
+    "stale_prob": 0.1
+  },
+  "behavior": {
+    "repage_after_min": 15,
+    "escalate_after_min": 25,
+    "cardiology_reluctance_nstemi": 0.35
+  },
+  "noise": {
+    "missing_ts_prob": 0.02,
+    "duplicate_order_prob": 0.01,
+    "cancel_prob": 0.03,
+    "code_flip_prob": 0.01
+  },
+  "sampling": {
+    "bin_size_min": 5,
+    "day_start": "2025-08-12 00:00:00"
+  }
+}

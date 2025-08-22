@@ -1,0 +1,32 @@
+{
+  "complaint_to_code": {
+    "abd_pain": 0,
+    "chest_pain": 1,
+    "dyspnea": 2,
+    "ent_oph": 3,
+    "minor_trauma": 4,
+    "neuro_deficit": 5,
+    "obgyn": 6,
+    "polytrauma": 7
+  },
+  "action_to_code": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+  },
+  "lab_code_prefixes": [
+    "CRP",
+    "TROPONIN"
+  ],
+  "xray_code_prefixes": [
+    "CXR"
+  ],
+  "ct_code_prefixes": [
+    "CT"
+  ]
+}
