@@ -1,0 +1,71 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+\fs22
+\b GPThandoff - 23 Aug 2025 (gate-first, no-MLP baseline)\b0\par
+\f0\par
+\b What this is\b0\par
+Concise handoff for the ED Pipeline gate-engine baseline (no MLP). Includes: architecture snapshot, thresholds, execution order, sanity probes, and fast fixes. No code required to read.\par
+\par
+\b Baseline tag (recorded)\b0\par
+name: \b gate_first_nomlp_baseline\b0 ; ts: 2025-08-23T10:41:01.823100+00:00; kernelspec: \b python3\b0 ; sanity: ttl\_max\_ok=True, gates\_wired\_ok=True, bundle\_ok=True.\par
+\par
+\b Architecture snapshot (current state)\b0\par
+- \b Gate engine (pure)\b0: \i gate_engine(fd, CONFIG)\i0 composes packs (uses real pack producers if present; otherwise ICU + BGA fallbacks).\par
+- \b Gate-pack merger\b0: \i merge_gatepacks(...)\i0 with TTL=\b max\b0, order-preserving gate de-dup, priority=max, last non-empty next\_action.\par
+- \b HL7 (single path)\b0: \i parse_hl7_all\i0 normalizes to canonical keys consumed downstream. Legacy \i parse_hl7_labs\i0 optional.\par
+- \b Phase-2 calculators split\b0:\par
+  \tab \b Calc utils\b0: \i _pick, _bool, _safe_round\i0.\par
+  \tab \b Calcs A\b0: qSOFA, MEWS, HEART, GRACE\_coarse, SOFA\_min, SIRS, Sepsis3.\par
+  \tab \b Calcs B\b0: Wells-PE/DVT, PERC, PESI/sPESI, MARBURG, GBS, Child-Pugh, corrected\_calcium, anion\_gap, assess\_d\_dimer, assess\_troponin\_delta.\par
+- \b Phase-2 bundle (split)\b0:\par
+  \tab B1 \i build_labs_norm\i0 (map canonical HL7 to calculator-friendly names; presence-guarded).\par
+  \tab B2 \i compute_phase2_scores\i0 (pure; returns structured scores).\par
+  \tab B3 \i phase2_bundle\i0 (assembler; one-liners + structured output). \par
+\par
+\b Canonical HL7 keys (examples)\b0\par
+- VBG / electrolytes: vbg\_pH, vbg\_pco2\_mmHg, vbg\_HCO3, vbg\_lactate, vbg\_Na, vbg\_Cl, vbg\_K.\par
+- Policies: troponin0\_ngL, lab\_ddimer\_mgL\_FEU, lab\_bili\_total\_umolL, lab\_albumin\_gL.\par
+\par
+\b Thresholds in use (model-free)\b0\par
+- \b BGA\b0:\par
+  \tab pH >= 7.50 \endash  BGA\_ALKALOSIS\_HIGH; \tab pH > 7.55 \endash  BGA\_ALKALOSIS\_CRITICAL.\par
+  \tab K+ >= 6.5 mmol/L \endash  CRITICAL; >= 6.0 mmol/L \endash  HIGH; < 2.5 mmol/L \endash  HYPOKALAEMIA\_CRITICAL.\par
+  \tab Na+ <= 125 mmol/L \endash  DYSNATRAEMIA\_CRITICAL; outside 130\endash 144 mmol/L \endash  DYSNATRAEMIA.\par
+  \tab Lactate >= 4.0 mmol/L \endash  BGA\_LACTATE\_CRITICAL.\par
+- \b ICU capacity\b0 (fallback defaults): TH\_ICU\_CAP\_OK = 0.15 (15\%); blocked: capacity <= 0.0; tight: 0.0 < capacity < 0.15.\par
+- \b TTL merge\b0: per-gate TTL = \b max\b0 across contributing packs.\par
+\par
+\b Execution order to reproduce baseline\b0\par
+1) CONFIG/bootstrap.\par
+2) Gate merger (G1) and Gate engine (G2).\par
+3) Unified HL7 cell (for bundle tests).\par
+4) Calc utils \endash  Calcs A \endash  Calcs B.\par
+5) Bundle B1 \endash  B2 \endash  B3.\par
+6) Sanity / Triage cells.\par
+\par
+\b Sanity probes (observed)\b0\par
+- \b TTL\_MAX\_OK\b0: PASS (merge TTL uses max).\par
+- \b GATES\_WIRED\_OK\b0: PASS (ICU capacity + BGA criticals produce alerts/gates).\par
+- \b PHASE2\_BUNDLE\_SMOKE\_OK\b0: PASS (canonical HL7 \u2192  bundle one-liners + scores).\par
+\par
+\b Troubleshooting (fast mapping)\b0\par
+- \i NameError: merge\_gatepacks\i0 \endash  run G1 (merger) or paste the shim.\par
+- \i NameError: gate\_engine\i0 \endash  run G2 (engine) after G1.\par
+- \i NameError: _pick/_bool/_safe\_round\i0 \endash  run Calc utils.\par
+- \i calc\_qsoFA vs calc\_qsofa\i0 \endash  alias once (or normalize naming in Calcs A).\par
+- \i NameError: parse\_hl7\_all\i0 \endash  run unified HL7 cell; bundle has a limited fallback for the smoke.\par
+\par
+\b Invariants to keep\b0\par
+- Single HL7 parsing path (no parsing inside calculators or bundle).\par
+- No I/O inside calculators/bundle; logging handled elsewhere.\par
+- Gate merger semantics: TTL=max, order-preserving de-dup, priority=max, last non-empty next\_action.\par
+- Kernelspec present: {\"name\":\"python3\",\"display\_name\":\"Python 3\",\"language\":\"python\"}.\par
+\par
+\b Re-entry recipe (quick)\b0\par
+- Run: CONFIG \u2192  G1 \u2192  G2 \u2192  Triage Harness \u2192  Sanity Pack.\par
+- Only add HL7 + Calculators + Bundle if you need bundle smokes.\par
+\par
+\b Notes\b0\par
+- Gate-first stays the arbiter. When reintroducing MLP later, keep it refine-only; calibrate probabilities (Platt/Isotonic) first; never veto safety gates.\par
+\par
+}
