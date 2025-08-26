@@ -1,0 +1,9 @@
+{
+  "suggestions": 20,
+  "accepted": 9,
+  "rejected": 11,
+  "clicks_saved": 9,
+  "seconds_saved": 90.0,
+  "acceptance_rate": 0.45,
+  "alert_fatigue_proxy": 0.55
+}

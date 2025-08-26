@@ -1,0 +1,135 @@
+{
+  "sop_chest_pain": {
+    "title": "Chest Pain Evaluation",
+    "nodes": [
+      {
+        "id": "ecg1",
+        "label": "ECG now"
+      },
+      {
+        "id": "labs",
+        "label": "Labs + hs-TnT"
+      },
+      {
+        "id": "ecg2",
+        "label": "Second ECG + hs-TnT"
+      },
+      {
+        "id": "roche",
+        "label": "Roche delta label"
+      },
+      {
+        "id": "dispo",
+        "label": "Disposition"
+      }
+    ],
+    "edges": [
+      [
+        "ecg1",
+        "labs"
+      ],
+      [
+        "labs",
+        "ecg2"
+      ],
+      [
+        "ecg2",
+        "roche"
+      ],
+      [
+        "roche",
+        "dispo"
+      ]
+    ]
+  },
+  "sop_sepsis": {
+    "title": "Sepsis Bundle",
+    "nodes": [
+      {
+        "id": "screen",
+        "label": "qSOFA≥2 / MEWS≥5"
+      },
+      {
+        "id": "cult",
+        "label": "Blood cultures"
+      },
+      {
+        "id": "abx",
+        "label": "Antibiotics ≤1h"
+      },
+      {
+        "id": "lact",
+        "label": "Lactate + repeat if >2"
+      },
+      {
+        "id": "fluids",
+        "label": "30 mL/kg"
+      }
+    ],
+    "edges": [
+      [
+        "screen",
+        "cult"
+      ],
+      [
+        "cult",
+        "abx"
+      ],
+      [
+        "abx",
+        "lact"
+      ],
+      [
+        "lact",
+        "fluids"
+      ]
+    ]
+  },
+  "sop_hf_af": {
+    "title": "Decomp HF / AF",
+    "nodes": [
+      {
+        "id": "triage",
+        "label": "Triage + ABC"
+      },
+      {
+        "id": "ecg",
+        "label": "ECG & rate"
+      },
+      {
+        "id": "diur",
+        "label": "Diuretics"
+      },
+      {
+        "id": "rate",
+        "label": "Rate control"
+      },
+      {
+        "id": "reassess",
+        "label": "Reassess"
+      }
+    ],
+    "edges": [
+      [
+        "triage",
+        "ecg"
+      ],
+      [
+        "ecg",
+        "diur"
+      ],
+      [
+        "ecg",
+        "rate"
+      ],
+      [
+        "diur",
+        "reassess"
+      ],
+      [
+        "rate",
+        "reassess"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,142 @@
+[
+  {
+    "ts": "2025-01-01 01:58:45.086965223+00:00",
+    "encounter_id": "E00006",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 02:28:45.086965223+00:00",
+    "encounter_id": "E00006",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 02:58:45.086965223+00:00",
+    "encounter_id": "E00006",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 03:54:25.356282677+00:00",
+    "encounter_id": "E00020",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 04:24:25.356282677+00:00",
+    "encounter_id": "E00020",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 04:54:25.356282677+00:00",
+    "encounter_id": "E00020",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 04:41:51.242123606+00:00",
+    "encounter_id": "E00022",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 05:21:51.242123606+00:00",
+    "encounter_id": "E00022",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 07:12:36.731231073+00:00",
+    "encounter_id": "E00032",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 07:42:36.731231073+00:00",
+    "encounter_id": "E00032",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 08:12:36.731231073+00:00",
+    "encounter_id": "E00032",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 07:00:44.202694090+00:00",
+    "encounter_id": "E00034",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 07:44:18.838211639+00:00",
+    "encounter_id": "E00042",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 08:16:18.838211639+00:00",
+    "encounter_id": "E00042",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 08:56:18.838211639+00:00",
+    "encounter_id": "E00042",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 10:51:12.973527515+00:00",
+    "encounter_id": "E00057",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 11:23:12.973527515+00:00",
+    "encounter_id": "E00057",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 12:03:12.973527515+00:00",
+    "encounter_id": "E00057",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 11:48:04.289913376+00:00",
+    "encounter_id": "E00059",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": false,
+    "reason": "CT pending > 60m"
+  },
+  {
+    "ts": "2025-01-01 12:28:04.289913376+00:00",
+    "encounter_id": "E00059",
+    "action": "FOLLOW_UP_IMAGING",
+    "accepted": true,
+    "reason": "CT pending > 60m"
+  }
+]
