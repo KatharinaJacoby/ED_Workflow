@@ -1,0 +1,83 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+\fs22
+\b Solo Maintainer Checklist — ED Pipeline (Gate-first, no-MLP)\b0\par
+\par
+\b Purpose\b0\par
+Lean operating notes for a single maintainer. Keep the baseline stable, make small improvements, and validate quickly. No extra tooling required.\par
+\par
+\b Current baseline snapshot\b0\par
+- Tag: \b gate_first_nomlp_baseline\b0\par
+- Kernelspec: \b python3\b0\par
+- Defaults: CONFIG[RUN\_UI]=False; CONFIG[RUN\_PIPELINE]=False\par
+- Sanity status (at last freeze): ttl\_max\_ok=True; gates\_wired\_ok=True; bundle\_ok=True\par
+\par
+\b What not to change (invariants)\b0\par
+- Single HL7 parsing path (\i parse\_hl7\_all\i0). \ul Do not\ulnone re-add parsing inside calculators/bundle.\par
+- No I/O inside calculators or bundle; logging happens in pipeline cells only.\par
+- Gate merger semantics: TTL=\b max\b0; priority=\b max\b0; order-preserving de-dup; next\_action=\b last non-empty\b0.\par
+- Keep function names stable: \i merge\_gatepacks, gate\_engine, build\_labs\_norm, compute\_phase2\_scores, phase2\_bundle\i0.\par
+- Paths remain CSV/dir semantics; notebook kernelspec = python3.\par
+\par
+\b Session workflow (reliable loop)\b0\par
+1) Choose \b one\b0 small improvement (new gate or threshold tweak).\par
+2) Run \b config/bootstrap\b0, then G1 (merger) + G2 (engine).\par
+3) If editing Phase-2: run HL7 unified → Calc utils → Calcs A → Calcs B → Bundle B1–B3.\par
+4) Run \b Triage Harness\b0 and \b Sanity Pack\b0 at the end. If green, publish; if red, undo the last change.\par
+5) Update the handoff note only if thresholds or gates changed.\par
+\par
+\b Execution order (cells)\b0\par
+- Minimal gate checks: CONFIG → G1 (merge) → G2 (engine) → Sanity.\par
+- Bundle/HL7 checks: add HL7 unified → Calc utils → Calcs A → Calcs B → B1 → B2 → B3.\par
+\par
+\b Validation (must pass)\b0\par
+- \b TTL\_MAX\_OK\b0: merger uses max per-gate TTL.\par
+- \b GATES\_WIRED\_OK\b0: ICU capacity + BGA criticals produce expected gates/alerts.\par
+- \b PHASE2\_BUNDLE\_SMOKE\_OK\b0: canonical HL7 → one-liners + scores return.\par
+\par
+\b Threshold governance (knobs)\b0\par
+- ICU capacity: TH\_ICU\_CAP\_OK (default 0.15). Blocked: cap ≤ 0.0; Tight: 0.0 < cap < TH.\par
+- BGA (venous): pH ≥ 7.50 (HIGH), pH > 7.55 (CRITICAL); K\super +\nosupersub: ≥ 6.5 (CRIT), ≥ 6.0 (HIGH), < 2.5 (CRIT);\par
+  Na\super +\nosupersub: ≤ 125 (CRIT), outside 130–144 (DYSNATRAEMIA); Lactate ≥ 4.0 (CRIT).\par
+- Overdue/alerts: last\_seen, since\_vitals\_min thresholds (exposed in UI when enabled).\par
+\par
+\b Ethics & scope guardrails\b0\par
+- Exclude protected attributes from gates; use clinical signals only.\par
+- Prefer systolic BP context over MAP unless arterial line exists.\par
+- When venous BGA present, include pH / K / Na / lactate into gating.\par
+\par
+\b Data handling\b0\par
+- Avoid storing PHI; use synthetic or minimized fields for testing.\par
+- Event log is append-only; no PII.\par
+\par
+\b Release notes (3 bullets max)\b0\par
+- What changed: \par
+- Why it helps: \par
+- How validated: which sanity probe(s) are green.\par
+\par
+\b Re-entry quick map (common failures → fixes)\b0\par
+- NameError: \i merge\_gatepacks\i0 → run G1.\par
+- NameError: \i gate\_engine\i0 → run G2 after G1.\par
+- NameError: \i \_pick/\_bool/\_safe\_round\i0 → run Calc utils.\par
+- calc\_qsoFA vs calc\_qsofa mismatch → alias once or normalize name in Calcs A.\par
+- NameError: \i parse\_hl7\_all\i0 → run unified HL7 cell.\par
+\par
+\b File naming / slug\b0\par
+- Use ASCII, hyphens, and date: \i gpt-gate-engine-ed-pipeline-YYYY-MM-DD.ipynb\i0.\par
+- “Slug” = URL/file-safe label derived from a title (lowercase, hyphenated).\par
+\par
+\b MLP re-introduction (later, optional)\b0\par
+- Gate-first remains arbiter; MLP may \b refine\b0 priorities but \ul never veto\ulnone safety gates.\par
+- Calibrate probabilities (Platt/Isotonic) before using outputs; monitor drift.\par
+\par
+\b Time budget suggestion\b0\par
+- 45–60 min per session: one change, run sanity, publish or roll back.\par
+\par
+\b Small templates\b0\par
+\ul Release note\ulnone : What / Why / Validation.\par
+\ul Incident review\ulnone : Summary (3 lines) → Timeline → Effects → Contributing factors → Fixes (owners/dates) → Prevention signals.\par
+\par
+\b Done when\b0\par
+- All three sanity probes pass and no new gates regress.\par
+\par
+}

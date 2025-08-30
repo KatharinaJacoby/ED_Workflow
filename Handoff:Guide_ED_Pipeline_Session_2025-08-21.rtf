@@ -1,0 +1,471 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;\f2\fswiss\fcharset0 Helvetica-Oblique;
+\f3\froman\fcharset0 Times-Roman;\f4\froman\fcharset0 Times-Bold;\f5\fmodern\fcharset0 Courier;
+\f6\froman\fcharset0 Times-Italic;\f7\fmodern\fcharset0 Courier-Bold;\f8\froman\fcharset0 TimesNewRomanPSMT;
+\f9\fmodern\fcharset0 Courier-Oblique;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid301\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid4}
+{\list\listtemplateid5\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid401\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid5}
+{\list\listtemplateid6\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid501\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid6}
+{\list\listtemplateid7\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid601\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid7}
+{\list\listtemplateid8\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid701\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid8}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}{\listoverride\listid5\listoverridecount0\ls5}{\listoverride\listid6\listoverridecount0\ls6}{\listoverride\listid7\listoverridecount0\ls7}{\listoverride\listid8\listoverridecount0\ls8}}
+\paperw11900\paperh16840\vieww12000\viewh14980\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\b\fs24 \cf0 ED Pipeline Demo \'e2\'80\'94 Handoff (Session 2025-08-21)
+\f1\b0 \
+Author: Assistant\
+Date: 2025-08-21 11:22:34\
+\
+
+\f0\b Scope
+\f1\b0 \
+This handoff captures the current demo baseline of the ED Pipeline notebook, the MLOPS bridge, Phase2 calculators/UI, medication plan import with interaction/allergy checks (paper scanner/paste), HL7 merge behavior, logging, and the steps to train and swap in a new model bundle. No production deployment; conference demo focus.\
+\
+
+\f0\b Stable Baseline
+\f1\b0 \
+\'95Notebook: 
+\f2\i your saved cleaned baseline (Option A applied)
+\f1\i0 \
+\'95Alternate copy created during cleanup\
+\'95Event log: /kaggle/working/event_log.jsonl (Kaggle) \'97/mnt/data/event_log.jsonl (local)\
+\'95Guards (single source of truth): CONFIG[\'91RUN\uc0\u8209 UI\'92], CONFIG[\'91RUN\u8209 MEDS\'92], CONFIG[\'91RUN\u8209 PIPELINE\'92], CONFIG[\'91RUN\u8209 SYNTH\'92]\
+\'95Model bundle (demo): 
+\f0\b ed\uc0\u8209 phase2\u8209 model\u8209 thr\u8209 patched(1).joblib
+\f1\b0 ; threshold \'a00.9988444286248084; features = 16\
+\
+
+\f0\b Deterministic Run Order
+\f1\b0 \
+1) Bootstrap/CONFIG (defines BASE, \uc0\u8209 p(), flags, paths)\
+2) (Optional) Meds/Allergy path sanity (ensures JSON files exist)\
+3) Bundle loader (copies the .joblib from /kaggle/input/<slug> to /kaggle/working and sets CONFIG[\'91MODEL\uc0\u8209 BUNDLE\u8209 PATH\'92])\
+4) Self-contained MLOPS bridge (exposes 
+\f2\i FEAT
+\f1\i0  and 
+\f2\i predict\uc0\u8209 one
+\f1\i0 )\
+5) Phase2 calculators + 
+\f2\i phase2\uc0\u8209 bundle
+\f1\i0 \
+6) UI cell (
+\f2\i Phase-2 calculators \'e2\'80\'94 optimized UI
+\f1\i0  + HL7 merge + ML one-liner)\
+\
+
+\f0\b Phase2 Calculators (implemented)
+\f1\b0 \
+qSOFA, MEWS, HEART, GRACE (coarse), SOFA (minimal), D-dimer (age-adjusted; pregnancy aware), Troponin \uc0\u916 \u327  (delta, absolute and percent), Wells PE/DVT, PERC, PESI + sPESI, SIRS, Sepsis-3 (with shock flag), Marburg, Glasgow-Blatchford (GI bleed), Child-Pugh, corrected calcium (albumin), anion gap (albumin-corrected).\
+Output format includes concise one-liners and a numeric dict for programmatic use.\
+\
+
+\f0\b HL7 Merge (in UI)
+\f1\b0 \
+\'95Parses OBX lines; extracts bilirubin, INR, albumin (unit-aware), troponin series (timestamped), and D-dimer (unit-aware).\
+\'95Merges into Labs JSON: always writes troponin\uc0\u8209 series; fills D-dimer + unit if available; merges bilirubin/INR/albumin.\
+\
+
+\f0\b Pregnancy-adapted YEARS
+\f1\b0 \
+Panel logic supports pregnancy pathway (context JSON: 
+\f2\i "pregnant": true
+\f1\i0 ). Emits a log line and applies pregnancy D-dimer thresholding. PERC is not used in pregnancy.\
+\
+
+\f0\b Meds Integration (single path kept)
+\f1\b0 \
+\'95Kept: 
+\f2\i Medication Plan Import + Checks (inline, no sidecars)
+\f1\i0  \'97supports paper scanner/OCR (if present) and paste of med plan text to build a Medications JSON.\
+\'95Removed: duplicate meds engines/UIs and the BMP barcode/XML (DataMatrix/FHIR) scanner per instruction.\
+\'95JSON files: CONFIG[\'91MED\uc0\u8209 RULES\u8209 PATH\'92] and CONFIG[\'91ALLERGIES\u8209 PATH\'92] (Kaggle-safe via \u8209 p()). Expected to contain arrays of rules and patient allergies.\
+\'95Checks: simple name/class interaction match and allergy/cross-reactivity match. Germany-realistic seeds recommended (e.g., phenprocoumon, DOAC class rules) if you want demo interactions.\
+\
+
+\f0\b ICU Panel
+\f1\b0 \
+\'95Replaces \'91actionable vs blocked\'92with: 
+\f2\i Next bed available on ICU X in X minutes/hrs
+\f1\i0  using capacity/occupied and discharge ETA inputs.\
+\
+
+\f0\b ML OPS Wiring
+\f1\b0 \
+\'95Bundle loader: copies the joblib from attached dataset and sets CONFIG[\'91MODEL\uc0\u8209 BUNDLE\u8209 PATH\'92].\
+\'95Bridge: loads bundle; exposes 
+\f2\i FEAT
+\f1\i0  (feature list) and 
+\f2\i predict\uc0\u8209 one(row)
+\f1\i0 . UI builds 
+\f2\i row
+\f1\i0  by mapping features from Labs/Vitals/Context with 0.0 fallback; computes calibrated probability and compares to bundle threshold; appends one-liner and logs 
+\f2\i ml\uc0\u8209 score
+\f1\i0 .\
+\
+
+\f0\b Known Good Demo Output (example)
+\f1\b0 \
+qSOFA=3  MEWS=8  GRACE(coarse)=110\
+HEART=2  SOFA(min)=7\
+D-dimer 780 vs thr 680 ug/L \uc0\u2192  High\
+Troponin \uc0\u916 \u327  60.0 ng/L (333.3) \uc0\u2192  FLAG\
+Wells-PE=4.5 (likely)  Wells-DVT=0 (unlikely)\
+PERC=fail  sPESI=2  PESI=V/188\
+SIRS=3  Sepsis3: YES  Shock: no\
+MARBURG=1/5  GBS=3\
+Child-Pugh C (10)\
+Corrected Ca=8.86 mg/dL\
+Anion gap=13.0, AGcorr=16.0\
+ML risk p=0.000 \uc0\u2192  ok (thr=0.999)\
+Logged to: /kaggle/working/event\uc0\u8209 log.jsonl\
+\
+
+\f0\b Attachments  Slugs
+\f1\b0 \
+\'95Demo notebook needs only the 
+\f0\b model bundle
+\f1\b0  dataset; 
+\f0\b no
+\f1\b0  Train/Val/Test CSVs required.\
+\'95If Kaggle added \'91(1)\'92to the filename, either reference it literally or use a glob loader to normalize to /kaggle/working/ed\uc0\u8209 phase2\u8209 model\u8209 thr\u8209 patched.joblib.\
+\
+
+\f0\b Troubleshooting Quicklist
+\f1\b0 \
+\'95
+\f0\b UI doesn\'91t show
+\f1\b0 : ensure CONFIG[\'91RUN\uc0\u8209 UI\'92]=True; run bootstrap first.\
+\'95
+\f0\b ML risk says bridge not loaded
+\f1\b0 : run bundle loader, then bridge cell; ensure CONFIG[\'91MODEL\uc0\u8209 BUNDLE\u8209 PATH\'92] points to the copied joblib under /kaggle/working.\
+\'95
+\f0\b File not found for bundle
+\f1\b0 : verify dataset slug and filename (watch for \'91(1)\'92). Consider robust glob.\
+\'95
+\f0\b Duplicate logs/prints
+\f1\b0 : make sure there is only one UI cell and one bridge; delete duplicate meds engines/UIs.\
+\'95
+\f0\b HL7 values missing
+\f1\b0 : confirm OBX fields present; the merge fills bilirubin/INR/albumin and, if present, D-dimer (with unit) and troponin\uc0\u8209 series.\
+\
+
+\f0\b Next Step: Train a New Model (summary)
+\f1\b0 \
+1) Open the 
+\f2\i trainer
+\f1\i0  notebook.\
+2) Attach CSV dataset (e.g., /kaggle/input/testtrainval with train\uc0\u8209 DE\u8209 full.csv, val\u8209 DE\u8209 full.csv, test\u8209 DE\u8209 full.csv).\
+3) Run the pipeline: proper train/val/test split; fit base classifier; select threshold with recall=0.85 floor; isotonic calibrate.\
+4) Export joblib with \'91pipeline\'92, \'91features\'92, \'91threshold\'92, and optional \'91calibrator\'92.\
+5) Upload the new bundle into a Kaggle dataset (unique slug) \'97or attach to the demo session and copy into /kaggle/working.\
+6) In the demo notebook, update the loader slug (or use glob), re-run bridge, re-run UI.\
+\
+
+\f0\b Minimal Code Snippets
+\f1\b0 \
+\ul Robust bundle loader\ulnone \
+import os, glob, shutil\
+DATASET = "your-bundle-slug"\
+ROOT = f"/kaggle/input/DATASET"\
+cands = []\
+for pat in ["ed\uc0\u8209 phase2\u8209 model*\u8209 patched*.joblib", "*phase2*patched*.joblib", "*.joblib"]:\
+\pard\pardeftab720\li360\partightenfactor0
+\cf0 cands += sorted(glob.glob(os.path.join(ROOT, pat)))\
+\pard\pardeftab720\partightenfactor0
+\cf0 assert cands, f"No .joblib found in ROOT"\
+SRC = cands[0]\
+DST = "/kaggle/working/ed\uc0\u8209 phase2\u8209 model\u8209 thr\u8209 patched.joblib"\
+if not os.path.exists(DST): shutil.copy2(SRC, DST)\
+CONFIG["MODEL\uc0\u8209 BUNDLE\u8209 PATH"] = DST\
+print("Bundle ready \uc0\u2192 , CONFIG["MODEL\uc0\u8209 BUNDLE\u8209 PATH"])\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\cf0 \
+\ul Debug ML features in UI\ulnone \
+miss = [f for f in FEAT if labs.get(f, vitals.get(f, ctx.get(f))) is None]\
+print(f"[ML debug] thr=res['thr']:.3f p=res['p']:.3f n\uc0\u8209 feat=len(FEAT) missing=len(miss)")\
+\
+\
+
+\f0\b Contract Checks
+\f1\b0 \
+\'95No background jobs; single-pass notebook. Guards gate optional panels.\
+\'95One \uc0\u8209 append\u8209 event, one bridge, one meds UI; no barcode BMP scanner.\
+\'95Paths Kaggle-safe via \uc0\u8209 p().\
+\
+
+\f0\b Done
+\f1\b0 \
+This handoff is self-contained for your new session. Attach the bundle dataset, run in order, and you are demo-ready; switch to training when desired.\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f3 \cf0 \expnd0\expndtw0\kerning0
+Totally fair. Here\'92s a blunt post-mortem so the pain is legible and fixable.\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 Why this was hard\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Interface constraints (Jupyter/Kaggle):
+\f3\b0 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0
+\f4\b \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Execution order matters.
+\f3\b0  Cells aren\'92t a \'93project\'94\'97they\'92re a tape. Any stray cell that mutates 
+\f5\fs26 CONFIG
+\f3\fs24  later silently overrides your bootstrap.\
+\ls1\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Multiple versions coexist.
+\f3\b0  Kaggle has 
+\f6\i notebook version
+\f3\i0  vs 
+\f6\i dataset attachment
+\f3\i0  vs 
+\f6\i working dir
+\f3\i0 . Deleting a notebook doesn\'92t kill a running session; renaming datasets adds \'93(1)\'94 to filenames.\
+\ls1\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Whitespace is law.
+\f3\b0  One bad indent turns half a UI cell into top-level code, so handlers don\'92t run.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f4\b \cf0 Codebase shape (organic growth):
+\f3\b0 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0
+\f4\b \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Duplicate engines/UIs.
+\f3\b0  Three meds engines + three UIs + 2 bridges = ambiguous source of truth.\
+\ls2\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Repeated 
+\f7\fs26 _append_event
+\f4\fs24  and 
+\f7\fs26 CONFIG
+\f4\fs24  writers.
+\f3\b0  Competing definitions 
+\f8 \uc0\u8594 
+\f3  nondeterminism.\
+\ls2\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Monolithic cells.
+\f3\b0  One 500-line cell is fragile; a single syntax hiccup bricks the panel.\
+\ls2\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Hard-coded paths.
+\f3\b0  Mixed 
+\f5\fs26 /mnt/data
+\f3\fs24 , 
+\f5\fs26 /kaggle/working
+\f3\fs24 , plus dataset slugs + \'93(1)\'94 filenames.\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 What we changed to stabilize it\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls3\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+One CONFIG.
+\f3\b0  Everything else deleted or prevented from toggling flags.\
+\ls3\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+One meds path.
+\f3\b0  Kept a self-contained \'93paper scanner/paste\'94 engine+UI; removed BMP barcode + duplicates.\
+\ls3\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+One bridge.
+\f3\b0  Self-contained loader that prints 
+\f5\fs26 Loaded\'85 Threshold\'85 Features\'85
+\f3\fs24  and exposes exactly 
+\f5\fs26 FEAT
+\f3\fs24  + 
+\f5\fs26 predict_one
+\f3\fs24 .\
+\ls3\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Robust bundle loader.
+\f3\b0  Either literal filename 
+\f6\i or
+\f3\i0  glob + normalize 
+\f8 \uc0\u8594 
+\f3  
+\f5\fs26 /kaggle/working/ed_phase2_model_thr_patched.joblib
+\f3\fs24 .\
+\ls3\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+UI cell refactor.
+\f3\b0  Proper scoping, single handler, full HL7 merge (also writes D-dimer + troponin series), single ML one-liner.\
+\ls3\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Guards.
+\f3\b0  
+\f5\fs26 RUN_UI
+\f3\fs24  controls rendering; text-mode smoke test when off.\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 Repeatable playbook (minimize cognitive load)\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls4\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 {\listtext	1	}\expnd0\expndtw0\kerning0
+Bootstrap first
+\f3\b0  (defines 
+\f5\fs26 CONFIG
+\f3\fs24 , 
+\f5\fs26 _p
+\f3\fs24 , paths).\uc0\u8232 
+\f6\i Never keep other cells that assign 
+\f9\fs26 CONFIG[...]
+\f6\fs24 .
+\f3\i0 \
+\ls4\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	2	}\expnd0\expndtw0\kerning0
+Bundle loader
+\f3\b0  (attach dataset 
+\f8 \uc0\u8594 
+\f3  copy 
+\f5\fs26 .joblib
+\f3\fs24  to 
+\f5\fs26 /kaggle/working
+\f3\fs24  
+\f8 \uc0\u8594 
+\f3  set 
+\f5\fs26 CONFIG["MODEL_BUNDLE_PATH"]
+\f3\fs24 ).\
+\ls4\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	3	}\expnd0\expndtw0\kerning0
+Bridge
+\f3\b0  (prints 
+\f5\fs26 Loaded\'85 Threshold\'85 Features\'85
+\f3\fs24 ).\
+\ls4\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	4	}\expnd0\expndtw0\kerning0
+Calculators
+\f3\b0  (defines 
+\f5\fs26 phase2_bundle
+\f3\fs24 ).\
+\ls4\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	5	}\expnd0\expndtw0\kerning0
+UI
+\f3\b0  (the single, cleaned cell). Click 
+\f4\b Compute + Log
+\f3\b0 .\
+\ls4\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	6	}\expnd0\expndtw0\kerning0
+Verify
+\f3\b0 : tail 
+\f5\fs26 event_log.jsonl
+\f3\fs24  for 
+\f5\fs26 phase2_bundle
+\f3\fs24  and 
+\f5\fs26 ml_score
+\f3\fs24 .\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 Quick diagnostics (5 checks)\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls5\ilvl0
+\f5\b0\fs26 \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+print(CONFIG)
+\f3\fs24  
+\f8 \uc0\u8594 
+\f3  flags as expected, 
+\f5\fs26 MODEL_BUNDLE_PATH
+\f3\fs24  points to 
+\f4\b working
+\f3\b0 .\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls5\ilvl0\cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Bridge print shows 
+\f4\b threshold + features
+\f3\b0 .\
+\ls5\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+UI output ends with 
+\f4\b ML line
+\f3\b0  (or \'93bridge not loaded\'94 
+\f8 \uc0\u8594 
+\f3  run bridge).\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls5\ilvl0
+\f5\fs26 \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+!ls /kaggle/input/<slug>
+\f3\fs24  shows actual filename (watch for \'93(1)\'94).\
+\ls5\ilvl0
+\f5\fs26 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+!tail -n 5 /kaggle/working/event_log.jsonl
+\f3\fs24  shows fresh entries.\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 Guardrails to keep\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls6\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Freeze CONFIG
+\f3\b0  (allow only 
+\f5\fs26 MODEL_BUNDLE_PATH
+\f3\fs24  to change).\
+\ls6\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Scanner cell
+\f3\b0  (lists duplicate 
+\f5\fs26 _append_event
+\f3\fs24 , multiple bridges, any 
+\f5\fs26 CONFIG[...] =
+\f3\fs24  mutations).\
+\ls6\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Small cells
+\f3\b0  (bootstrap, loader, bridge, calculators, UI). If one fails, the others aren\'92t collateral.\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 Mental model: interface vs internal\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls7\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Interface (brittle):
+\f3\b0  cell order, file paths, dataset slugs, widget callbacks, indentation.\
+\ls7\ilvl0
+\f4\b \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Internal (stable):
+\f3\b0  calculators, HL7 parse, bridge API (
+\f5\fs26 predict_one
+\f3\fs24 , 
+\f5\fs26 FEAT
+\f3\fs24 ), JSON event logging.\
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f4\b\fs48 \cf0 For training next\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls8\ilvl0
+\f3\b0\fs24 \cf0 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Use the 
+\f4\b trainer
+\f3\b0  notebook only (CSV dataset attached).\
+\ls8\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Save bundle with keys: 
+\f5\fs26 pipeline
+\f3\fs24 , 
+\f5\fs26 features
+\f3\fs24 , 
+\f5\fs26 threshold
+\f3\fs24 , 
+\f5\fs26 calibrator?
+\f3\fs24 .\
+\ls8\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+Upload bundle as a new dataset (new slug), adjust the demo\'92s loader slug, run loader 
+\f8 \uc0\u8594 
+\f3  bridge 
+\f8 \uc0\u8594 
+\f3  UI.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 If you hit friction again, send me: (a) the first 3 printed lines after bootstrap, (b) the bridge\'92s two prints, (c) the last 10 lines of the event log. That triage set isolates 90% of issues fast.\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1 \cf0 \kerning1\expnd0\expndtw0 \
+}

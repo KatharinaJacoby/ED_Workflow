@@ -1,1 +1,2 @@
-{"ts": "2025-08-21T06:23:25.749742Z", "type": "trainer_complete", "model_out": "/kaggle/working/ed_phase2_model.joblib", "pred_out": "/kaggle/working/test_predictions.csv", "threshold": 0.0}
+{"ts": "2025-08-28T10:37:47.393990+00:00", "type": "preflight_ping", "ok": true}
+{"ts": "2025-08-28T10:37:47.547058+00:00", "type": "selftest", "ok": true}

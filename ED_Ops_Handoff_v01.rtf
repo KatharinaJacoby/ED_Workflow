@@ -1,0 +1,73 @@
+{\rtf1\ansi\deff0
+\fs24
+\b ED Ops Handoff — Session Summary\b0 \par 
+Timestamp: 2025-08-22 17:28 UTC \par 
+Owner/Requester: You (Katharina). Purpose: Prepare the next GPT session to continue the pivot to operational tooling (asset tracking, workflow notifications, bed orchestration), with ML (Gate_Pos) paused for research-only. \par 
+\b 1) Current Operating Focus\b0 \par 
+We pivoted from outcome prediction to operations. The active path is a rules-only ops layer that: \par 
+- Builds imaging queues (CT/X-ray + US heuristic), \par 
+- Subscribes to lab-ready notifications (Troponin/CRP placeholder), \par 
+- Surfaces ICU bed ETAs by capacity flags, and \par 
+- Lists discharge-ready candidates (no pending labs/imaging, not an admit action). \par 
+\b 2) Artifacts in this workspace (created or provided this session)\b0 \par 
+OK  /mnt/data/ops_rules.py \par 
+OK  /mnt/data/ops_queue_val.jsonl \par 
+OK  /mnt/data/ops_queue_val.csv \par 
+MISSING  /mnt/data/gen4_de_full_units_fallid_col2.csv \par 
+OK  /mnt/data/ed_synth_gen4.py \par 
+OK  /mnt/data/gen4_de_full_units.csv \par 
+OK  /mnt/data/coding_maps_json.json \par 
+OK  /mnt/data/train_DE_full.csv \par 
+OK  /mnt/data/val_DE_full.csv \par 
+OK  /mnt/data/test_DE_full.csv \par 
+Notes: If a path is MISSING here but referenced in Kaggle logs, it likely lives in your Kaggle environment, not this sandbox. \par 
+\b 3) Ops Rules Module\b0 \par 
+File: /mnt/data/ops_rules.py \par 
+Kinds: lab_ready_sub, imaging_queue, bed_eta, discharge_ready \par 
+Priority: bed_eta (95) > lab_ready_sub (90) > imaging_queue (80/50/40) > discharge_ready (60) \par 
+Ultrasound heuristic: abd_pain or minor_trauma always; polytrauma if no CT planned. Complaint codes resolved from coding_maps when present. \par 
+\b 4) Queue Snapshot (built from val_DE_full.csv)\b0 \par 
+Counts by kind (this session output): \par 
+- lab_ready_sub: 5 \par 
+- imaging_queue: 73 \par 
+- discharge_ready: 155 \par 
+- bed_eta: 0 (appears when naechste_Aktion==admit) \par 
+Artifacts: /mnt/data/ops_queue_val.jsonl, /mnt/data/ops_queue_val.csv \par 
+\b 5) Data Schema and IDs\b0 \par 
+CSV schema (event-level) validated as 18 columns, with Fall-ID in column 2: \par 
+["Tag","Fall-ID","t_min","Triage","Leitsymptom","HF","MAP","ICU_Kap","Kap_veraltet","t_norm","hat_Labor","Labor_ausstehend","hat_Roentgen","Roentgen_ausstehend","hat_CT","CT_ausstehend","naechste_Aktion","Gate_Pos"] \par 
+Fall-ID format: mixed in provided files (e.g., E-05-####). For ops tasks we accept existing strings; normalization to a single prefix can be added if you want it mandated. \par 
+\b 6) ML (Gate_Pos) Status — research-only\b0 \par 
+Per your Kaggle logs (provenance: user-provided): \par 
+- Sizes: Train 9755 | Val 5760 | Test 5760 \par 
+- Prevalence: train 0.094 | val 0.124 | test 0.143 \par 
+- Validation: AUC 0.540, AP 0.139, thr 0.0000, confusion [[0, 5047], [0, 713]] \par 
+- Test: AUC 0.513, AP 0.171, thr 0.0000, confusion [[0, 4937], [0, 823]] \par 
+Observation: event-level recall-floor collapsed to τ≈0 (predict-all-positive); not actionable for ops. ML remains paused for UI decisions. \par 
+\b 7) Invariants and Workflow Contract (carried forward)\b0 \par 
+- Do not alter model architecture/trainer wiring without explicit instruction. \par 
+- Notebook kernelspec: python3. \par 
+- No claims of “implemented/wired/working” unless code and smoke-asserts are executed in-run. \par 
+- Provenance required for any copied code or sidecars. \par 
+- No virtual resources: only reference artifacts created here or explicitly uploaded by you. \par 
+- Allowed: new features behind guards; append-only patches; optional deps are lazy-loaded. \par 
+\b 8) Interfaces for Next Session\b0 \par 
+Control vocabulary (you gate actions): \par 
+SPEC — provide requirements; I reply ACK. \par 
+PLAN — request a plan; I return terse steps. \par 
+PATCH <name> — request exact diffs/cells; no execution. \par 
+RUN <name> — execute last patch/steps; show asserts + artifacts. \par 
+ASSERT — ask for specific checks (schema, prevalence, monotonicity, etc.). \par 
+HALT — stop after current turn; no further suggestions. \par 
+\b 9) Open Decisions / TODOs\b0 \par 
+- Fall-ID policy: enforce a single prefix (E-01-####) or preserve existing (E-05-####)? \par 
+- Bed ETA: replace policy window (60–240 min) with live bed-board adapter when available. \par 
+- Lab adapter: wire HL7/FHIR feed for “result ready” instead of SLA ETA. \par 
+- Asset tracking: define source for device locations (CSV/API). \par 
+- Ultrasound heuristic: confirm indications; adjust per your protocols. \par 
+- (Optional) Encounter-level thresholding & calibration safeguards if ML is revisited later. \par 
+\b 10) How to Continue Immediately\b0 \par 
+Option A — UI wire-up (no ML): load latest DE_full snapshot, run ops_rules.build_ops_queue(...), render queues and notifications. \par 
+Option B — Adapters: provide lab middleware and bed board sample payloads; I’ll add parsers and live ETAs behind guards. \par 
+Option C — Simulation: use ed_synth_gen4 to test what-if changes (triage staffing, CPU capacity) on queue metrics. \par 
+}

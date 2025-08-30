@@ -1,0 +1,21 @@
+AI-Driven Emergency Care Coordination with Syndromic Surveillance (Urban ED Setting)
+Author: Katharina, MD
+Word count: ~250
+
+Background
+Emergency departments (EDs) face fragmentation across handovers (EMS → triage → ED physician → specialty teams), manual orchestration of diagnostics, and dynamic resource constraints (beds, ICU, equipment). These frictions increase delays, cognitive load, and risk. We developed and field-tested a research pipeline that combines clinical gate logic, an existing MLP classifier, and a new syndromic surveillance layer trained on de-identified MIMIC-IV-ED data.
+
+Methods
+Data: MIMIC‑IV‑ED demo tables (edstays, triage, diagnosis, vitalsign; optional medrecon/pyxis), all de‑identified.
+Features: hourly arrivals; occupancy (interval expansion of stay windows); demographics (gender counts, age stats); triage/acuity distribution; chief‑complaint token counts (top‑K vocabulary); vitals aggregates (median/mean); harmonic day‑of‑week and hour encodings.
+Models: (1) Production MLP gate engine for care prioritization (pre‑existing).
+(2) New unsupervised syndromic layer: SimpleImputer → StandardScaler → IsolationForest. The detector learns baseline hourly patterns and flags outlying surges (e.g., respiratory, GI) using keyword buckets and seasonal adjustment. Real‑time scoring uses a one‑hour sliding window assembled from the same feature builder to guarantee column alignment.
+Governance: MIMIC-only, de‑identified inputs; logging restricted to pseudonymous IDs and hourly buckets; explicit PHI/GDPR safeguards. We transparently used LLM assistance for code refactoring, error handling, and documentation under physician oversight.
+
+Results
+End‑to‑end runs completed with consistent feature extraction and anomaly scoring. The system generated plausible alerts (e.g., GI-syndrome warnings) while keeping the MLP gate engine intact. Smoke tests validated: bundle loading, gating, event logging, and real‑time scoring. The architecture integrates into a clinician‑facing UI without code changes to existing gates.
+
+Conclusion
+A modular, non‑intrusive syndromic layer can augment ED coordination by surfacing early pattern shifts while respecting privacy and workflow boundaries. Future work: prospective evaluation, alert calibration to local patterns, fairness audits, and operational cost/benefit analysis.
+Transparency statement
+This abstract and associated codebase were produced by a physician (domain expert) with transparent use of LLMs for drafting, code suggestions, and debugging. All outputs were verified and executed on de‑identified data only.
