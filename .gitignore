@@ -1,0 +1,10 @@
+__pycache__/
+.ipynb_checkpoints/
+*.log
+*.tmp
+.DS_Store
+.env
+*.env
+.data_cache/
+data/processed/
+notebooks/.ipynb_checkpoints/
