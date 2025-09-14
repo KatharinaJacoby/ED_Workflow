@@ -23,16 +23,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Sanity: list repo
-        run: |
-          pwd
-          ls -la
-          ls -la src || true
-
-      - name: Sanity: import carefirst
+      - name: Sanity import
         env:
           PYTHONPATH: src
-        run: python -c "import sys; print(sys.version); import carefirst; print('OK:', carefirst.__name__)"
+        run: python -c "import carefirst; print('OK:', carefirst.__name__)"
 
       - name: Run tests
         env:
