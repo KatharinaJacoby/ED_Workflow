@@ -1,7 +1,7 @@
 
 # --- Gate Engine integration (drop this in a new cell) ---
 import pandas as pd
-from ops_rules import compute_gates
+from carefirst.ops_rules import compute_gates
 
 # Replace `df_patients` with the DataFrame variable your UI uses
 try:

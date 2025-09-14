@@ -3,7 +3,7 @@
 # Minimal API server exposing SOP endpoints for the PoC core.
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from core_services_sop_registry import SOPRegistry
+from carefirst.core_services_sop_registry import SOPRegistry
 import uvicorn, os
 
 app = FastAPI(title="ED Ops Core (PoC)", version="v5")

@@ -1,8 +1,8 @@
 
 import pandas as pd
 import numpy as np
-from orchestrator_core import UnitCapacity, Hospital, pick_hospital_by_capacity_and_eta, DiagnosticsOrchestrator, route_service
-from pd_utils import clamp_series_or_frame, safe_assign, assert_no_na
+from carefirst.orchestrator_core import UnitCapacity, Hospital, pick_hospital_by_capacity_and_eta, DiagnosticsOrchestrator, route_service
+from carefirst.pd_utils import clamp_series_or_frame, safe_assign, assert_no_na
 
 def test_capacity_pick_prefers_free_beds_over_distance():
     h1 = Hospital("Near", 2.0, UnitCapacity("EDObs", 5, occupied=5), UnitCapacity("ICU", 5, occupied=5), {"IM": UnitCapacity("IM", 10, occupied=10)})

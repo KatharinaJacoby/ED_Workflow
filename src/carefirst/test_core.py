@@ -1,7 +1,7 @@
 
 # tests/test_core.py
 import os, json, math
-from core_services_sop_registry import SOPRegistry
+from carefirst.core_services_sop_registry import SOPRegistry
 from troponin_rules import roche_hstnt_delta
 
 def test_roche_rule_core():

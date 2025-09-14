@@ -3,7 +3,7 @@
 
 from datetime import datetime, timedelta
 import json
-from ed_coordinator_complete import *
+from carefirst.ed_coordinator_complete import *
 
 def create_realistic_handoff_scenario():
     """Create a complete handoff scenario with a realistic patient"""

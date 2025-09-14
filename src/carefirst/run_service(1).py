@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from typing import Optional
 import uvicorn, os, json, time
 
-from core_services_sop_registry import SOPRegistry
+from carefirst.core_services_sop_registry import SOPRegistry
 
 app = FastAPI(title="ED Ops Core (PoC)", version="v5.3")
 

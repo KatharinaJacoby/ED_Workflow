@@ -88,7 +88,7 @@ def run_ui(tracker, get_state: Callable[[], Any], get_actions: Callable[[Any], L
     
 # --- SOP auto-pull + flows ---
 with st.expander("SOP auto-pull and flows", expanded=False):
-    import sop_auto
+    import carefirst.sop_auto
     if st.button("Refresh SOPs from sop-notaufnahme.de"):
         res = sop_auto.refresh_sop_registry(tracker.CONFIG, base_url="https://sop-notaufnahme.de/sop/")
         st.write(res)

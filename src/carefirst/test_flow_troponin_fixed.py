@@ -1,6 +1,6 @@
 
 import pytest
-from flow_troponin_fixed import classify_troponin_0_1h, DEFAULT_ASSAY, TroponinValueError
+from carefirst.flow_troponin_fixed import classify_troponin_0_1h, DEFAULT_ASSAY, TroponinValueError
 
 def test_single_draw_rule_out():
     label, ctx = classify_troponin_0_1h(DEFAULT_ASSAY, 1.9, None)

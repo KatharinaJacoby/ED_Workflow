@@ -1,6 +1,6 @@
 # demo_generate_and_emit.py — generate a synthetic day and emit HL7 to ed_demo_data/orbis_sim
 import pandas as pd
-from synthetic_generator import load_config, default_config, generate_day, emit_hl7
+from carefirst.synthetic_generator import load_config, default_config, generate_day, emit_hl7
 from pathlib import Path
 
 try:

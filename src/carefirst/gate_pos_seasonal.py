@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List, Tuple
 import pandas as pd
 import numpy as np
-from gate_pos import GatePos, WorkflowState
+from carefirst.gate_pos import GatePos, WorkflowState
 
 @dataclass
 class SeasonalityManager:

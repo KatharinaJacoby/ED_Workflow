@@ -1,7 +1,7 @@
 
 import math
 import pytest
-from hsctnt_roche_sex_adj import classify_hsctnt_0_1h, hsctnt_99th_url, TroponinValueError
+from carefirst.hsctnt_roche_sex_adj import classify_hsctnt_0_1h, hsctnt_99th_url, TroponinValueError
 
 def test_urls_by_sex():
     assert hsctnt_99th_url("female") == 9.0
