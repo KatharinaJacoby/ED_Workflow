@@ -1,163 +1,116 @@
 #!/usr/bin/env python3
-"""
-Rewrite bare imports to 'carefirst.<module>' when the imported top-level name
-matches a module/package under src/carefirst/.
-
-Examples:
-  from core_services_sop_registry import SOPRegistry -> from carefirst.core_services_sop_registry import SOPRegistry
-  import core_services_sop_registry as csr           -> import carefirst.core_services_sop_registry as csr
-
-Safe guards:
-- Skips lines already importing from 'carefirst.' or using relative imports (from .foo import ...).
-- Only rewrites when the FIRST segment (before any dot) matches a top-level name found under src/carefirst/.
-- Expands comma imports into separate lines to avoid tricky formatting.
-- Leaves multiline/parenthesized imports untouched (reported but not changed).
-"""
 from __future__ import annotations
-import argparse
-import re
+import argparse, re
 from pathlib import Path
-from typing import Iterable
+from typing import Dict, List, Iterable
 
 PKG = "carefirst"
 SRC = Path("src") / PKG
 
-# Simple regexes (single-line imports only)
 RE_FROM = re.compile(r"^(?P<indent>\s*)from\s+(?P<mod>[A-Za-z_][\w\.]*)\s+import\s+(?P<rest>.+)$")
 RE_IMPORT = re.compile(r"^(?P<indent>\s*)import\s+(?P<rest>.+)$")
 
-def top_level_names() -> set[str]:
-    names: set[str] = set()
+def all_module_paths() -> Dict[str, List[str]]:
+    """Map leaf module name -> list of full dotted paths under carefirst."""
+    m: Dict[str, List[str]] = {}
     if not SRC.exists():
-        return names
-    for p in SRC.iterdir():
-        if p.name.startswith("_"):
+        return m
+    for p in SRC.rglob("*.py"):
+        if p.name == "__init__.py":
             continue
-        if p.is_dir() and (p / "__init__.py").exists():
-            names.add(p.name)
-        elif p.is_file() and p.suffix == ".py":
-            names.add(p.stem)
-    return names
+        rel = p.relative_to(SRC).with_suffix("")  # e.g. app/core_services_sop_registry
+        dotted = ".".join(rel.parts)              # e.g. app.core_services_sop_registry
+        leaf = rel.name                           # e.g. core_services_sop_registry
+        m.setdefault(leaf, []).append(dotted)
+    return m
 
 def is_parenthesized(line: str) -> bool:
-    # crude heuristic; skip to be safe
     return "(" in line and ")" not in line and "\\" not in line
 
-def rewrite_lines(path: Path, topnames: set[str]) -> tuple[str, list[str]]:
-    changed_lines: list[str] = []
-    new_text_lines: list[str] = []
-
-    with path.open("r", encoding="utf-8") as f:
-        lines = f.readlines()
+def rewrite_file(path: Path, leaf_index: Dict[str, List[str]]) -> tuple[str, List[str]]:
+    changes: List[str] = []
+    out: List[str] = []
+    lines = path.read_text(encoding="utf-8").splitlines(True)
 
     for i, line in enumerate(lines):
         orig = line
-
-        # Skip obviously dangerous cases
         if is_parenthesized(line):
-            new_text_lines.append(line)
-            continue
+            out.append(line); continue
 
         m = RE_FROM.match(line)
         if m:
             indent, mod, rest = m.group("indent", "mod", "rest")
-            if mod.startswith(PKG + ".") or mod.startswith("."):
-                new_text_lines.append(line)
-                continue
+            if mod.startswith(f"{PKG}.") or mod.startswith("."):
+                out.append(line); continue
             first = mod.split(".")[0]
-            if first in topnames:
-                new = f"{indent}from {PKG}.{mod} import {rest}\n"
+            # If module is a bare leaf and unique, expand to full path
+            if "." not in mod and first in leaf_index and len(leaf_index[first]) == 1:
+                full = leaf_index[first][0]                  # e.g. app.core_services_sop_registry
+                new = f"{indent}from {PKG}.{full} import {rest}\n"
                 if new != line:
-                    changed_lines.append(f"{path}:{i+1}: {line.rstrip()}  -->  {new.rstrip()}")
+                    changes.append(f"{path}:{i+1}: {orig.rstrip()}  -->  {new.rstrip()}")
                     line = new
-            new_text_lines.append(line)
-            continue
+            out.append(line); continue
 
         m = RE_IMPORT.match(line)
         if m:
             indent, rest = m.group("indent", "rest")
-            # Split on commas at top level (no parentheses handling)
             parts = [p.strip() for p in rest.split(",")]
-            out_lines: list[str] = []
-            changed_any = False
+            new_parts = []
+            changed = False
             for part in parts:
-                if not part:
-                    continue
-                # part can be "name" or "name as alias"
-                tokens = part.split()
-                name = tokens[0]
-                alias = None
-                if len(tokens) >= 3 and tokens[1] == "as":
-                    alias = tokens[2]
+                if not part: continue
+                toks = part.split()
+                name = toks[0]; alias = toks[2] if len(toks)>=3 and toks[1]=="as" else None
 
-                if name.startswith(PKG + ".") or name.startswith("."):
-                    out = f"{indent}import {name}"
-                    if alias:
-                        out += f" as {alias}"
-                    out_lines.append(out + "\n")
-                    continue
+                if name.startswith(f"{PKG}.") or name.startswith("."):
+                    new_parts.append(part); continue
 
                 first = name.split(".")[0]
-                if first in topnames:
-                    changed_any = True
-                    newname = f"{PKG}.{name}"
-                    out = f"{indent}import {newname}"
-                    if alias:
-                        out += f" as {alias}"
-                    out_lines.append(out + "\n")
+                if "." not in name and first in leaf_index and len(leaf_index[first]) == 1:
+                    full = f"{PKG}.{leaf_index[first][0]}"
+                    repl = f"{full}" + (f" as {alias}" if alias else "")
+                    new_parts.append(repl); changed = True
                 else:
-                    # leave as-is
-                    out = f"{indent}import {name}"
-                    if alias:
-                        out += f" as {alias}"
-                    out_lines.append(out + "\n")
+                    new_parts.append(part)
 
-            if changed_any:
-                changed_lines.append(f"{path}:{i+1}: {orig.rstrip()}  -->")
-                for ol in out_lines:
-                    changed_lines.append(f"    {ol.rstrip()}")
-                new_text_lines.extend(out_lines)
-            else:
-                new_text_lines.append(orig)
-            continue
+            if changed:
+                changes.append(f"{path}:{i+1}: {orig.rstrip()}  -->  {indent}import " + ", ".join(new_parts))
+                line = f"{indent}import " + ", ".join(new_parts) + "\n"
+            out.append(line); continue
 
-        # default: unchanged
-        new_text_lines.append(line)
+        out.append(line)
 
-    return "".join(new_text_lines), changed_lines
+    return "".join(out), changes
 
-def iter_py_files() -> Iterable[Path]:
-    # Scan your code and scripts; skip venv/tests
+def files_to_scan() -> Iterable[Path]:
     for root in ["src/carefirst", "scripts"]:
         base = Path(root)
         if base.exists():
-            for p in base.rglob("*.py"):
-                yield p
+            yield from base.rglob("*.py")
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--apply", action="store_true", help="Write changes to files")
+    ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
-    topnames = top_level_names()
-    if not topnames:
-        print(f"[warn] No modules detected under {SRC}. Nothing to do.")
+    leaf_index = all_module_paths()
+    if not leaf_index:
+        print(f"[warn] No modules found under {SRC}")
         return
 
-    all_changes: list[str] = []
-    for path in iter_py_files():
-        new_text, changed = rewrite_lines(path, topnames)
-        if changed:
-            all_changes.extend(changed)
+    any_changes = False
+    for path in files_to_scan():
+        new_text, changes = rewrite_file(path, leaf_index)
+        if changes:
+            any_changes = True
+            print("\n".join(changes))
             if args.apply:
                 path.write_text(new_text, encoding="utf-8")
-
-    if all_changes:
-        print("\n".join(all_changes))
-        if not args.apply:
-            print("\n[DRY-RUN] Changes not written. Re-run with --apply to modify files.")
-    else:
+    if not any_changes:
         print("[ok] No import rewrites needed.")
+    elif not args.apply:
+        print("\n[DRY-RUN] Re-run with --apply to write changes.")
 
 if __name__ == "__main__":
     main()
