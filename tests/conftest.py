@@ -11,7 +11,7 @@ def snapshot():
     assert nb_path.exists(), f"Notebook not found at {nb_path}"
     nb = nbformat.read(nb_path.as_posix(), as_version=4)
     code = "\n\n".join(
-        c.get("source","") for c in nb["cells"] if c.get("cell_type")=="code"
+        c.get("source", "") for c in nb["cells"] if c.get("cell_type") == "code"
     )
     classes = re.findall(r'^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)\b', code, re.M)
     funcs = re.findall(r'^\s*def\s+([A-Za-z_][A-Za-z0-9_]*)\b', code, re.M)
@@ -29,7 +29,7 @@ def snapshot():
         "code_text_len": len(code),
         "code": code,
     }
-    # Optional: write a snapshot for debugging (not required by tests)
+    # Optional: write a snapshot for debugging (tests do NOT read this file)
     pathlib.Path("notebook_snapshot.json").write_text(
         json.dumps(snap, indent=2), encoding="utf-8"
     )
