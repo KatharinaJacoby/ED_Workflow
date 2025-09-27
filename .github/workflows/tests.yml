@@ -1,3 +1,10 @@
+- name: Preflight: show notebooks and NOTEBOOK_PATH
+  run: |
+    echo "NOTEBOOK_PATH=${NOTEBOOK_PATH:-<not set>}"
+    echo "Repo notebooks:"
+    git ls-files | grep -i '\.ipynb$' || true
+
+
 name: tests
 on:
   push:
