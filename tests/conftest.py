@@ -1,10 +1,8 @@
 import os, json, re, pathlib, nbformat, pytest
-
 DEFAULT_NOTEBOOK_PATH = os.environ.get(
     "NOTEBOOK_PATH",
     "notebooks/pipeline-ui-gate-mlp-catboost-spc.ipynb",
 )
-
 @pytest.fixture(scope="session")
 def snapshot():
     nb_path = pathlib.Path(DEFAULT_NOTEBOOK_PATH)
@@ -29,7 +27,6 @@ def snapshot():
         "code_text_len": len(code),
         "code": code,
     }
-    # Optional: write a snapshot for debugging (tests do NOT read this file)
     pathlib.Path("notebook_snapshot.json").write_text(
         json.dumps(snap, indent=2), encoding="utf-8"
     )
