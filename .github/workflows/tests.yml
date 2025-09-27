@@ -1,0 +1,51 @@
+name: tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest nbformat
+
+      - name: Run tests
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          test -f pipeline-ui-gate-mlp-catboost-spc.ipynb
+          python - <<'PY'
+import nbformat, json, pathlib, re
+fn = "pipeline-ui-gate-mlp-catboost-spc.ipynb"
+nb = nbformat.read(fn, as_version=4)
+code = "\n\n".join(c.get("source","") for c in nb["cells"] if c.get("cell_type")=="code")
+classes = re.findall(r'^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)\b', code, re.M)
+funcs = re.findall(r'^\s*def\s+([A-Za-z_][A-Za-z0-9_]*)\b', code, re.M)
+imports = [l.strip() for l in code.splitlines() if re.match(r'^\s*(import\s+[A-Za-z0-9_\.]+|from\s+[A-Za-z0-9_\.]+\s+import)\b', l.strip())]
+snap = {
+  "kernelspec": nb.get("metadata", {}).get("kernelspec", {}),
+  "n_cells": len(nb.get("cells", [])),
+  "classes": classes,
+  "functions": funcs,
+  "imports": imports,
+  "code_text_len": len(code),
+  "has_streamlit": "streamlit" in code,
+  "has_kaggle_paths": "/kaggle/working" in code or "/kaggle/input" in code,
+  "filename": fn,
+}
+pathlib.Path("notebook_snapshot.json").write_text(json.dumps(snap, indent=2), encoding="utf-8")
+PY
+          pytest -q
