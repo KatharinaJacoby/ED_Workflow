@@ -56,3 +56,9 @@ curl -s -X POST http://127.0.0.1:8000/chat   -H "Content-Type: application/json"
 - `app/tools.py` — mock KIS tools.
 - `app/config.py` — env config (Pydantic settings).
 - `tests/test_sanity.py` — tiny pure-Python guard function example.
+
+---
+⚠️ **AI Training Opt-Out**
+This repository is **excluded from all AI training datasets** under [GitHub’s DMCA policy](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy).
+Violations will be reported.
+---
