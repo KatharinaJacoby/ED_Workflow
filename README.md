@@ -1,5 +1,3 @@
-Here’s a **single-file, drop-in replacement** for your GitHub README.md, optimized for clarity, reproducibility, and immediate use by both engineers and clinicians:
-
 # ED Workflow Coordination System
 
 **A local-first, advice-only system for real-time ED workflow optimization using Gate Engine, CatBoost, and SPC.**
