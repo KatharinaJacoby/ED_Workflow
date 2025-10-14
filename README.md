@@ -1,61 +1,66 @@
-# ED-Assistant PoC (Local FastAPI, minimal, M1-friendly)
+# ED Workflow Coordination System
 
-This is a **minimal, boring-on-purpose** FastAPI service designed to run locally on a MacBook Air (M1, 8GB).
-It defaults to a **mock model backend** so you can run it without any extra setup. Later, flip a switch to use **Ollama** (optional).
+**A local-first, advice-only system for emergency department workflow optimization**
 
-## Quickstart
+This project integrates a **Gate Engine**, **CatBoost predictive models**, and **Statistical Process Control (SPC)** to provide real-time, explainable advice for ED capacity management, anomaly detection, and root cause analysis—without automated decision-making.
 
-### 0) (Optional) Install Ollama + pull a small model
-```bash
-# Optional
-brew install ollama
-ollama serve
-ollama pull llama3.2:3b-instruct || ollama pull llama3.1:8b-instruct
-```
+---
 
-### 1) Create and activate a venv
-```bash
-python3 -m venv .venv
-source .venv/bin/activate  # zsh/bash
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-```
+## 🔍 Problem Framing
 
-### 2) Install dependencies
-```bash
-pip install -r requirements.txt
-```
+### Multi-Objective System
+1. **Anomaly Detection (SPC)**
+   - *Is the ED deviating from expected behavior?*
+   - **Metrics:** Admissions/hour, % respiratory complaints, lab turnaround time.
+   - **Output:** Binary alert (0/1) + confidence score.
 
-### 3) Configure (optional)
-Copy `.env.example` to `.env` and adjust:
-```bash
-cp .env.example .env
-```
+2. **Root Cause Analysis (CatBoost)**
+   - *What’s causing the anomaly?*
+   - **Metrics:** Correlations between symptoms, labs, external factors (weather, events).
+   - **Output:** Probability distribution over causes (e.g., flu: 0.7, norovirus: 0.2).
 
-### 4) Run
-```bash
-uvicorn app.main:app --reload --port 8000
-```
+3. **Decision Automation (Gate Engine)**
+   - *What should we do about it?*
+   - **Actions:** Adjust capacity thresholds, reassign teams, trigger protocols.
 
-### 5) Test with curl
-```bash
-curl -s -X POST http://127.0.0.1:8000/chat   -H "Content-Type: application/json"   -d '{"session_id":"visit-001","message":"Ich warte seit 2 Stunden und habe Angst.","patient_context":{"Alter":"68","Beschwerde":"Brustschmerz"}}' | jq
-```
+**Formalization:**
+- **Input (X):** Time-series + tabular data (EHR, labs, weather).
+- **Output (Y):**
+  - `Y_spc`: Binary anomaly flag.
+  - `Y_catboost`: Probability vector over causes.
+  - `Y_actions`: Recommended Gate Engine adjustments.
 
-## Backends
+---
 
-- **mock** (default): returns a deterministic, empathetic template response. No network, no model.
-- **ollama** (optional): set `MODEL_BACKEND=ollama` and run an Ollama server at `OLLAMA_URL` (default `http://localhost:11434`).
+## 🛠 Core Components
 
-## Files
+### 1. Gate Engine
+- **Purpose:** Rule-based system for capacity management, handoff protocols, and equipment tracking.
+- **Features:**
+  - Configurable thresholds (e.g., "page if ICU >90% full").
+  - ICU negotiation rules (pilot stage).
+  - **Rules as Code:** Adjust protocols based on model outputs.
 
-- `app/main.py` — FastAPI app wiring.
-- `app/router.py` — `/chat` route.
-- `app/schemas.py` — Pydantic request/response.
-- `app/prompt.py` — German empathy system prompt.
-- `app/model_client.py` — backend switch (mock/ollama).
-- `app/tools.py` — mock KIS tools.
-- `app/config.py` — env config (Pydantic settings).
-- `tests/test_sanity.py` — tiny pure-Python guard function example.
+### 2. CatBoost Models
+- **Purpose:** Predictive models for:
+  - Length of Stay > 6h
+  - ICU transfer (3h)
+  - Intubation (2h)
+  - Sepsis bundle (2h)
+- **Features:**
+  - SHAP explanations for transparency.
+  - Trained on MIMIC-IV ED data.
+  - Cross-validated with isotonic calibration.
+- **Configuration:**
+  ```python
+  CatBoostClassifier(
+      depth=6,
+      learning_rate=0.05,
+      iterations=500,
+      l2_leaf_reg=3,
+      cat_features=["triage_acuity", "chief_complaint", "allergies"]
+  )
+
 
 ---
 ⚠️ **AI Training Opt-Out**
