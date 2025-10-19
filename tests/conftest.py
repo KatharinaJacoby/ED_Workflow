@@ -1,4 +1,4 @@
-import os, json, re, pathlib, nbformat, pytest
+import os, json, re, pathlib, nbformat, pytest, warnings
 
 def _discover_notebook():
     # 1) Respect NOTEBOOK_PATH if provided
@@ -25,10 +25,36 @@ def _discover_notebook():
         return preferred[0]
 
     # 5) Otherwise pick the one with the most code cells; if tie, require NOTEBOOK_PATH
-    def code_cells_count(path):
-        nb = nbformat.read(path.as_posix(), as_version=4)
-        return sum(1 for c in nb["cells"] if c.get("cell_type") == "code")
+    def _is_valid_notebook(path):
+        """Return True if the path contains a valid notebook JSON with cells.
 
+        Suppress nbformat warnings about missing cell ids while checking.
+        """
+        try:
+            text = pathlib.Path(path).read_text(encoding="utf-8")
+            # quick JSON sanity check
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Cell is missing an id field")
+                nb = nbformat.reads(text, as_version=4)
+            if not isinstance(nb, dict) and not hasattr(nb, "get"):
+                return False
+            return "cells" in nb
+        except Exception:
+            return False
+
+    def code_cells_count(path):
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Cell is missing an id field")
+                nb = nbformat.read(path.as_posix(), as_version=4)
+            return sum(1 for c in nb["cells"] if c.get("cell_type") == "code")
+        except Exception:
+            # Treat unreadable/invalid notebooks as having zero code cells so they're ignored
+            return 0
+
+    # Filter out non-notebook or malformed .ipynb files (sometimes stray files have that extension)
+    cands = [p for p in cands if _is_valid_notebook(p)]
+    assert cands, "No valid .ipynb files found. Set NOTEBOOK_PATH to a real notebook."
     cands.sort(key=code_cells_count, reverse=True)
     top = cands[0]
     top_count = code_cells_count(top)
@@ -44,7 +70,9 @@ def _discover_notebook():
 @pytest.fixture(scope="session")
 def snapshot():
     nb_path = _discover_notebook()
-    nb = nbformat.read(nb_path.as_posix(), as_version=4)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Cell is missing an id field")
+        nb = nbformat.read(nb_path.as_posix(), as_version=4)
     code = "\n\n".join(
         c.get("source", "") for c in nb["cells"] if c.get("cell_type") == "code"
     )
