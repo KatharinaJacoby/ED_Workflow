@@ -32,6 +32,8 @@ def test_discover_prefers_preferred_name(tmp_path, monkeypatch, tmp_path_factory
     _write_nb(nb2, [nbformat.v4.new_code_cell("b=2")])
 
     # monkeypatch cwd to tmp_path so _discover_notebook scans it
+    # Ensure CI-provided NOTEBOOK_PATH doesn't override discovery in this test
+    monkeypatch.delenv("NOTEBOOK_PATH", raising=False)
     monkeypatch.chdir(tmp_path)
     found = _discover_notebook()
     assert pathlib.Path(found).name == "pipeline_main.ipynb"
