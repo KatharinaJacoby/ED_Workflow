@@ -137,5 +137,5 @@ To enforce these rules, the code includes:
 ---
 **Last updated**: 2025-10-18
 **License**: Apache 2.0 (but **safety requirements are binding** for clinical use).
-**Maintainers**: [Your Name/Org]
+**Maintainers**: [KatharinaJacoby]
 ```
