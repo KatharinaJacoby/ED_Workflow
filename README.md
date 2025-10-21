@@ -2,7 +2,7 @@
 
 **A local-first, advice-only system for real-time ED workflow optimization using Gate Engine, CatBoost, and SPC.**
 
-[https://github.com/KatharinaJacoby/ED_Workflow/blob/Main_organized/Clinical_safety.md]
+[Clinical Manifesto](https://github.com/KatharinaJacoby/ED_Workflow/blob/Main_organized/Clinical_safety.md)
 
 ---
 
