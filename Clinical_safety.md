@@ -131,8 +131,7 @@ To enforce these rules, the code includes:
 ---
 ## 📢 Report Safety Issues
 - **GitHub Issues**: Label with `safety-critical`.
-- **Email**: [safety@projectname.org](mailto:safety@projectname.org) (replace with real contact).
-- **Regulatory bodies**: For severe violations, we will notify [ONC](https://www.healthit.gov)/[FDA](https://www.fda.gov).
+- **Email**: [KatharinaJacoby](k.jacoby at posteo.de)
 
 ---
 **Last updated**: 2025-10-18
