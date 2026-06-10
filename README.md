@@ -1,6 +1,7 @@
-# ED Workflow Coordination System CARE (Clinical Assessment & Risk Engine)
-
+# CARE (Clinical Assessment & Risk Engine)
 **A local-first, advice-only system for real-time ED workflow optimization using Gate Engine, CatBoost, and SPC.**
+# 🏆 Winner of the Hackathon of Emergency Medicine at ICEM 2026!
+> I'm looking for informaticians and EM physicians to take over maintenance and expansion - DM if interested.
 
 [CLINICAL SAFETY MANIFESTO](https://github.com/KatharinaJacoby/ED_Workflow/blob/Main_organized/Clinical_safety.md)
 
