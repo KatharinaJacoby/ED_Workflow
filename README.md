@@ -1,4 +1,4 @@
-# ED Workflow Coordination System
+# ED Workflow Coordination System CARE (Clinical Assessment & Risk Engine)
 
 **A local-first, advice-only system for real-time ED workflow optimization using Gate Engine, CatBoost, and SPC.**
 
