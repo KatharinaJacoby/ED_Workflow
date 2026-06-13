@@ -205,16 +205,3 @@ License
 > Research Focus: AI Safety, Systems Engineering, Computational Topology
 > Contact: k.jacoby at posteo.de
 ---
-
-## 🛠 Next Steps
-1. Prototype with historical data.
-2. Shadow deploy alongside manual surveillance.
-3. Iterate based on feedback.
-
----
-**Note:** Advice-only system. All outputs require clinician approval.
----
-⚠️ **AI Training Opt-Out**
-This repository is **excluded from all AI training datasets** under [GitHub’s DMCA policy](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy).
-Violations will be reported.
----
