@@ -2,11 +2,11 @@
 
 **A local-first, advice-only system for real-time ED workflow optimization using Gate Engine, CatBoost, and SPC.**
 
-# 🏆 Winner of the Hackathon of Emergency Medicine at ICEM 2026!
+## 🏆 Winner of the Hackathon of Emergency Medicine at ICEM 2026!
 
 > **A big thank you to the Hackathon team for Presentation Design & Clinical Framing** – we had a lot of fun and not much sleep 🚀
 >
-> **Call for Collaborators:** I am looking for **informaticians** and **EM physicians** to take over maintenance, EHR integration, and further development. My primary research focus has shifted to AI safety theory and computational topology. If you are interested in stewarding this tool, please contact me via GitHub Issues or my clinic homepage.
+> **Call for Collaborators:** I am looking for **informaticians** and **EM physicians** to take over maintenance, EHR integration, and further development. If you are interested in stewarding this tool, please contact me via GitHub Issues or my clinic homepage.
 
 ---
 
